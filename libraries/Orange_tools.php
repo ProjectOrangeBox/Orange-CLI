@@ -68,11 +68,39 @@ class Orange_tools {
 	}
 
 	public function fix() {
-		$this->fix_permissions();
+		$this->fix_file_permissions();
 		$this->fix_symlink();
+		$this->fix_acl();
 	}
 
-	public function fix_permissions() {
+	public function fix_acl() {
+		delete_cache_by_tags('acl');
+		
+		ci()->o_permission_model->administrator_refresh();
+	}
+
+	public function clear_cache() {
+		$http = config('config.base_url');
+		$md5 = md5(config('config.encryption_key').config('config.base_url'));
+	
+		return file_get_contents(rtrim($http,'/').'/cli/fix/cache/'.$md5);
+	}
+	
+	public function clear_cache_process($key) {
+		$md5 = md5(config('config.encryption_key').config('config.base_url'));
+		
+		$success = 'failed';
+		
+		if ($key === $md5) {
+			if (ci()->cache->clean() === true) {
+				$success = 'success';
+			}
+		}
+		
+		return $success;
+	}
+
+	public function fix_file_permissions() {
 		$composer_obj = $this->get_composer_object(ROOTPATH . '/composer.json');
 	
 		ci()->console->output('Setting the Default Permissions');
@@ -137,48 +165,6 @@ class Orange_tools {
 			}
 		}
 
-	}
-
-	public function migration($action='current') {
-		ci()->load->library('migration');
-
-		echo $action.chr(10);
-		
-		switch($action) {
-			case 'current':
-				$current = ci()->migration->current();
-			
-				if ($current === FALSE) {
-		 			show_error(ci()->migration->error_string());
-		 		}
-		 		
-		 		var_dump($current);
-			break;
-			case 'find_migrations':
-			case 'find':
-				$migrations = ci()->migration->find_migrations();
-				
-				var_dump($migrations);
-			break;
-			case 'latest':
-				$latest = ci()->migration->latest();
-			
-				if ($latest === FALSE) {
-		 			show_error(ci()->migration->error_string());
-		 		}
-		 		
-		 		var_dump($latest);
-			break;
-			case 'version':
-				$version = ci()->migration->version();
-			
-				if ($version === FALSE) {
-		 			show_error(ci()->migration->error_string());
-		 		}
-		 		
-		 		var_dump($version);
-			break;
-		}
 	}
 
 	public function relative_symlink($target, $link) {
