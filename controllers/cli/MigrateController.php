@@ -94,4 +94,12 @@ class MigrateController extends MY_Controller {
 		passthru('composer update');
 	}
 	
+	public function site_upCliAction() {
+		ci('orange_tools')->site_up();
+	}
+	
+	public function site_downCliAction() {
+		ci('orange_tools')->site_down();
+	}
+	
 } /* end class */

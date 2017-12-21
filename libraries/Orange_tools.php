@@ -45,7 +45,7 @@ class Orange_tools {
 			switch($output_as) {
 				case 'cli':
 					foreach ($table as $row) {
-						$responds .= str_pad($row[0],32,' ',STR_PAD_RIGHT).$row[1].chr(10);	
+						$responds .= trim(str_pad($row[0],32,' ',STR_PAD_RIGHT).$row[1]).chr(10);	
 					}
 				break;
 				case 'html':
@@ -205,6 +205,30 @@ class Orange_tools {
 		}
 		
 		return $composer_obj;
+	}
+	
+	public function site_down() {
+		$data = [
+			'group'=>'application',
+			'name'=>'site open',
+			'value'=>0,
+			'enabled'=>1,
+		];
+	
+		ci('o_setting_model')->update_if_exists($data,['group'=>'application','name'=>'site open']);
+		
+		
+	}
+	
+	public function site_up() {
+		$data = [
+			'group'=>'application',
+			'name'=>'site open',
+			'value'=>1,
+			'enabled'=>1,
+		];
+	
+		ci('o_setting_model')->update_if_exists($data,['group'=>'application','name'=>'site open']);
 	}
 
 } /* end class */
