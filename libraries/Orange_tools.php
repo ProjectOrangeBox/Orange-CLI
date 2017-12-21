@@ -71,6 +71,7 @@ class Orange_tools {
 		$this->fix_file_permissions();
 		$this->fix_symlink();
 		$this->fix_acl();
+		$this->clear_cache();
 	}
 
 	public function fix_acl() {
