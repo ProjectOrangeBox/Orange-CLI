@@ -91,10 +91,10 @@ class Console {
 	public function option_plus_one($match) {
 		foreach ($_SERVER['argv'] as $idx=>$a) {
 			if (substr($a,0,1) == '-' && substr($a,-1) == $match) {
-				return $_SERVER['argv'][$idx+1];	
+				return $_SERVER['argv'][$idx+1];
 			}
 		}
-		
+
 		return null;
 	}
 
@@ -175,7 +175,7 @@ class Console {
 	}
 
 	public function input($prefix = '') {
-		return $this->in($prefix);	
+		return $this->in($prefix);
 	}
 
 	public function d() {

@@ -1,11 +1,11 @@
-<?php 
+<?php
 
 class Migration_extras {
-	
+
 	public function __construct() {
 		ci()->load->library('migration');
 	}
-	
+
 	public function copy_config($name) {
 		$child          = debug_backtrace(null, 1);
 		$child_file     = $child[0]['file'];
@@ -43,7 +43,7 @@ class Migration_extras {
 
 		return $success;
 	}
-	
+
 	public function add_access($data) {
 		$defaults = [
 			'is_editable'  => 0,
@@ -154,7 +154,7 @@ class Migration_extras {
 
 				if ($composer_obj) {
 					if (isset($composer_obj->orange->symlink)) {
-						
+
 						$links = $composer_obj->orange->symlink;
 
 						if (is_array($links)) {
@@ -167,7 +167,7 @@ class Migration_extras {
 			}
 		}
 	}
-	
+
 	public function add_rw_folder($name) {
 		return (is_writable($this->var_folder)) ? mkdir($this->var_folder . '/' . rtrim($name, '/'), 0777, true) : false;
 	}
@@ -202,7 +202,7 @@ class Migration_extras {
 		/* finally the folder */
 		return rmdir($dir);
 	}
-	
+
 	public function query($sql, $database_config = 'default') {
 		$success = false;
 
@@ -261,7 +261,7 @@ class Migration_extras {
 		return in_array($column, $columns);
 	}
 
-	
+
 	public function find_n_replace($file_path, $find, $replace) {
 		$success = false;
 
@@ -275,7 +275,7 @@ class Migration_extras {
 
 		return $success;
 	}
-	
+
 	public function relative_symlink($target, $link) {
 		/* remove the link that might be there */
 
@@ -294,7 +294,7 @@ class Migration_extras {
 		/* create it */
 		return symlink(ROOTPATH . $target, ROOTPATH . $link);
 	}
-	
+
 	public function get_relative_path($from, $to) {
 		// some compatibility fixes for Windows paths
 		$from = is_dir($from) ? rtrim($from, '\/') . '/' : $from;
@@ -331,29 +331,29 @@ class Migration_extras {
 
 	public function get_next_sequential() {
 		$folder = config('migration.migration_path');
-	
+
 		$files = glob($folder.'*.php');
-	
+
 		$highest = 0;
-	
+
 		foreach ($files as $file) {
 			$parts = explode('_',basename($file));
-		
+
 			$highest = (int)ltrim($parts[0],'0') + 1;
 		}
-	
+
 		return substr('000'.$highest,-3);
 	}
 
 	public function create($name) {
 		$name = ($name) ? filter_filename($name) : 'migration';
-	
+
 		if (config('migration.migration_type') == 'timestamp') {
 			$stamp = date('YmdHis');
 		} else {
 			$stamp = ci()->migration_extras->get_next_sequential();
 		}
-	
+
 		$folder = config('migration.migration_path');
 		$file = $folder.$stamp.'_'.$name.'.php';
 		$template = $this->get_migration_template($name,$stamp);
@@ -361,7 +361,7 @@ class Migration_extras {
 		if (!is_writable(rtrim($folder,'/'))) {
 			die('Can not write to '.rtrim($folder,'/').chr(10));
 		}
-		
+
 		file_put_contents($file,$template);
 
 		return 'Created: '.$file;
@@ -370,54 +370,54 @@ class Migration_extras {
 	public function current() {
 		/* TRUE if no migrations are found, current version string on success, FALSE on failure */
 		$current = ci()->migration->current();
-	
+
 		if ($current === FALSE) {
  			show_error(ci()->migration->error_string());
  		}
- 		
+
  		return $current;
 	}
-	
+
 	public function find() {
 		/* An array of migration files */
 		return ci()->migration->find_migrations();
 	}
-	
+
 	public function latest() {
 		/* Current version string on success, FALSE on failure */
 		$latest = ci()->migration->latest();
-	
+
 		if ($latest === FALSE) {
  			show_error(ci()->migration->error_string());
  		}
- 		
+
  		return $latest;
 	}
-	
+
 	public function version($mixed) {
 		/* TRUE if no migrations are found, current version string on success, FALSE on failure */
-		
+
 		/* $target_version (mixed) – Migration version to process */
 		$version = ci()->migration->version($mixed);
-	
+
 		if ($version === FALSE) {
  			show_error(ci()->migration->error_string());
  		}
- 		
+
  		return $version;
 	}
 
 	public function get_migration_template($name,$stamp) {
 		ci()->load->library('parser');
-	
+
 		$data = [
 			'name'=>$name,
 			'stamp'=>$stamp,
 			'ucfirst'=>ucfirst($name),
 		];
-	
+
 $template = <<<EOF
-<?php 
+<?php
 
 /* {stamp}_{ucfirst} */
 
@@ -441,12 +441,12 @@ class Migration_{ucfirst} extends CI_Migration {
 				'null' => TRUE,
 			],
 		]);
-		
+
 		\$this->dbforge->add_key('blog_id', TRUE);
-		
+
 		\$this->dbforge->create_table('blog');
 	}
-	
+
 	/* example down function */
 	public function down() {
 		\$this->dbforge->drop_table('blog');
