@@ -85,7 +85,7 @@ class Orange_tools {
 	public function fix_acl() {
 		delete_cache_by_tags('acl');
 
-		ci()->o_permission_model->_refresh();
+		ci('o_permission_model')->_refresh();
 	}
 
 	public function clear_cache() {
