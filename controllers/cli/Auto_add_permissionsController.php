@@ -1,6 +1,6 @@
 <?php
 
-class Add_accessController extends MY_Controller {
+class Auto_add_permissionsController extends MY_Controller {
 	public $libraries = ['console'];
 
 	public function indexCliAction() {
@@ -30,7 +30,7 @@ class Add_accessController extends MY_Controller {
 
 		ci('console')->out('<cyan>'.$path.'\n');
 
-		$new_class_file = $this->make_dummy_class($path);
+		$new_class_file = $this->make_dummy_class_file($path);
 
 		$pos = strpos($path,'/controllers/');
 		$path = substr($path,$pos + strlen('/controllers/'));
@@ -91,11 +91,18 @@ class Add_accessController extends MY_Controller {
 		ci('o_permission_model')->add($key,$group,$description);
 	}
 
-	public function make_dummy_class($path) {
-		$new_class_name = 'Controller_'.md5($path);
+	public function make_dummy_class_file($real_path) {
+		$new_class_name = 'Controller_'.md5($real_path);
 		$new_class_filepath = '/tmp/'.$new_class_name.'.php';
+		$old_class_name = basename($real_path,'.php');
 
-		file_put_contents($new_class_filepath,str_replace('class '.basename($path,'.php').' extends','class '.$new_class_name.' extends',file_get_contents($path)));
+		$file_content = file_get_contents($real_path);
+
+		if (strpos($file_content,'class '.$old_class_name.' extends') === false) {
+			die('Could not locate class name "'.$old_class_name.'" in "'.$real_path.'"'.chr(10));
+		}
+
+		file_put_contents($new_class_filepath,str_replace('class '.$old_class_name.' extends','class '.$new_class_name.' extends',$file_content));
 
 		return $new_class_filepath;
 	}
