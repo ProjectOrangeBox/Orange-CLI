@@ -1,9 +1,6 @@
 <?php
 
 class Orange_tools {
-	public function __construct() {
-		ci()->load->library('console');
-	}
 
 	public function git_status($output_as='none',$table_template=null) {
 		/* search all the folder under root for .git/HEAD */
@@ -112,7 +109,7 @@ class Orange_tools {
 	public function fix_file_permissions() {
 		$composer_obj = $this->get_composer_object(ROOTPATH . '/composer.json');
 
-		ci()->console->output('Setting the Default Permissions');
+		ci('console')->output('Setting the Default Permissions');
 
 		/* files */
 		$cli = 'find "'.ROOTPATH.'" -type f | xargs chmod 664';
@@ -125,7 +122,7 @@ class Orange_tools {
 		@system($cli);
 
 		/* change the others back */
-		ci()->console->output('Changes Cache folder and stuff');
+		ci('console')->output('Changes Cache folder and stuff');
 
 		if (isset($composer_obj->orange->permission)) {
 
@@ -135,7 +132,7 @@ class Orange_tools {
 				foreach ($permissions[0] as $filename=>$filemode) {
 
 					if (substr($filename,0,1) !== '#') {
-						ci()->console->output('<yellow>'.$filename.' <cyan>'.$filemode);
+						ci('console')->output('<yellow>'.$filename.' <cyan>'.$filemode);
 
 						/* does this folder exist? */
 						if (!file_exists(ROOTPATH.'/'.$filename)) {
@@ -157,7 +154,7 @@ class Orange_tools {
 	public function fix_symlink() {
 		$composer_obj = $this->get_composer_object(ROOTPATH . '/composer.json');
 
-		ci()->console->output('Relink Symbolic Links');
+		ci('console')->output('Relink Symbolic Links');
 
 		if (isset($composer_obj->orange->symlink)) {
 
@@ -166,7 +163,7 @@ class Orange_tools {
 			if (is_array($links)) {
 				foreach ($links[0] as $public => $private) {
 					if (substr($public,0,1) !== '#') {
-						ci()->console->output('<yellow>'.$private.' <white>>> <cyan>'.$public);
+						ci('console')->output('<yellow>'.$private.' <white>>> <cyan>'.$public);
 
 						$this->relative_symlink($private, $public);
 					}
@@ -196,18 +193,18 @@ class Orange_tools {
 	}
 
 	protected function get_composer_object($composer_file) {
-		ci()->console->output('Using Composer File <yellow>'.$composer_file);
+		ci('console')->output('Using Composer File <yellow>'.$composer_file);
 
 		if (file_exists($composer_file)) {
 			$composer_obj = json_decode(file_get_contents($composer_file));
 
 			if ($composer_obj === null) {
-				ci()->console->error('composer.json malformed');
+				ci('console')->error('composer.json malformed');
 
 				exit(1);
 			}
 		} else {
-			ci()->console->error('can not locate composer.json as "'.$composer_file.'"');
+			ci('console')->error('can not locate composer.json as "'.$composer_file.'"');
 
 			exit(1);
 		}
