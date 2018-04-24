@@ -346,7 +346,7 @@ class Migration_extras {
 	}
 
 	public function create($name) {
-		$name = ($name) ? filter_filename($name) : 'migration';
+		$name = ($name) ? filter('filename',$name) : 'migration';
 
 		if (config('migration.migration_type') == 'timestamp') {
 			$stamp = date('YmdHis');

@@ -85,7 +85,7 @@ class Auto_add_permissionsController extends MY_Controller {
 		ci('console')->out('<yellow>'.trim($dir.' <red>'.$class.' <yellow>'.$method.' <green>'.$request_method).'\n');
 
 		$key = 'url::/'.strtolower($dir.$class.'::'.$method.'~'.$request_method);
-		$group = filter_human($class);
+		$group = filter('human',$class);
 		$description = filter_human($dir.' '.$request_method.' '.$class.' '.$method);
 
 		ci('o_permission_model')->add($key,$group,$description);
