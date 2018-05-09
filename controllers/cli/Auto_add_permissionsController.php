@@ -82,13 +82,13 @@ class Auto_add_permissionsController extends MY_Controller {
 	}
 
 	public function add_access($dir,$class,$method,$request_method) {
-		ci('console')->out('<yellow>'.trim($dir.' <red>'.$class.' <yellow>'.$method.' <green>'.$request_method).'\n');
-
 		$key = 'url::/'.strtolower($dir.$class.'::'.$method.'~'.$request_method);
 		$group = filter('human',$class);
-		$description = filter_human($dir.' '.$request_method.' '.$class.' '.$method);
+		$description = filter('human',$dir.' '.$request_method.' '.$class.' '.$method);
 
-		ci('o_permission_model')->add($key,$group,$description);
+		if (ci('o_permission_model')->add($key,$group,$description)) {
+			ci('console')->out('<yellow>'.trim($dir.' <red>'.$class.' <yellow>'.$method.' <green>'.$request_method).'\n');
+		}
 	}
 
 	public function make_dummy_class_file($real_path) {
