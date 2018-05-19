@@ -352,13 +352,13 @@ class Console {
 		return $this;
 	}
 
-	public function getWidth($default=80) {
+	public function getWidth() {
 		return (int)shell_exec('tput cols');
 	}
 
 	//--------------------------------------------------------------------
 
-	public function getHeight($default=32) {
+	public function getHeight() {
 		return (int)shell_exec('tput lines');
 	}
 
@@ -399,6 +399,12 @@ class Console {
 		} else {
 			fwrite(STDERR, "\007");
 		}
+	}
+	
+	public function line($length=null,$char='-') {
+		$length = ($length) ? (int)$length : $this->getWidth();
+	
+		return $this->e(str_pad('',$length,$char));
 	}
 
 } /* end output class */

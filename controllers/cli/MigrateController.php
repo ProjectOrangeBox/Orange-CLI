@@ -1,105 +1,102 @@
 <?php
 
 class MigrateController extends MY_Controller {
-
-	public function __construct() {
-		parent::__construct();
-
-		$this->load->library(['orange_tools','migration_extras','console']);
+	/* https://www.codeigniter.com/user_guide/libraries/migration.html */
+	public $responds = null;
+	
+	/**
+		Wrapper for migrate/current
+	*/
+	public function upCliAction() {
+		$this->currentCliAction();
+	}
+	
+	/**
+		Wrapper for migrate/version/###
+	*/
+	public function downCliAction($version=null) {
+		$this->versionCliAction($version);
 	}
 
-	public function indexCliAction() {
-		$this->console->out($this->load->view('migrate_help',null,true));
-	}
-
-	public function gitCliAction() {
-		$results = $this->orange_tools->git_status('cli');
-
-		$this->console->e('<yellow>'.$results);
-	}
-
+	/* built in functions */
+	
+	/**
+		Migrates up to the current version
+		whatever is set for $config['migration_version'] in application/config/migration.php.
+	
+		https://www.codeigniter.com/user_guide/libraries/migration.html#CI_Migration::current
+	*/
 	public function currentCliAction() {
-		/* TRUE if no migrations are found, current version string on success, FALSE on failure */
-
-		$results = $this->migration_extras->current();
-
-		if ($results === true) {
-			$results = 'No migrations are found';
-		} elseif($results === false) {
-			$results = 'failure';
-		}
-
-		$this->console->e($results);
-	}
-
-	public function findCliAction() {
-		/* An array of migration files */
-
-		$results = $this->migration_extras->find();
-
-		foreach ($results as $result) {
-			$pathinfo = pathinfo($result);
-
-			$this->console->e($pathinfo['filename']);
-		}
-	}
-
-	public function latestCliAction() {
-		/* Current version string on success, FALSE on failure */
-
-		$results = $this->migration_extras->latest();
-
-		if ($results === false) {
-			$results = 'failure';
+		$mixed = ci('migration')->current();
+		
+		if ($mixed) {
+			
 		} else {
-			$results = 'Latest Version '.$results;
+		
 		}
-
-		$this->console->e($results);
 	}
 
-	public function versionCliAction($mixed='') {
-		/* TRUE if no migrations are found, current version string on success, FALSE on failure */
-
-		if (empty($mixed)) {
-			$this->console->error('Version not specified.');
-		}
-
-		$results = $this->migration_extras->version($mixed);
-
-		if ($results === true) {
-			$results = 'No migrations are found';
-		} elseif($results === false) {
-			$results = 'failure';
-		}
-
-		$this->console->e($results);
+	/**
+		Return an array of migration filenames that are found in the migration_path property.
+		
+		https://www.codeigniter.com/user_guide/libraries/migration.html#CI_Migration::find_migrations
+	*/
+	public function findCliAction() {
+		$this->responds = ci('migration')->find_migrations();
 	}
 
-	public function createCliAction($description='') {
+	/**
+		This works much the same way as current() but instead of looking for the $config['migration_version']
+		the Migration class will use the very newest migration found in the filesystem.
+
+		https://www.codeigniter.com/user_guide/libraries/migration.html#CI_Migration::latest
+	*/
+	public function latestCliAction() {
+		$this->responds = ci('migration')->latest();
+	}
+
+	/**
+		Version can be used to roll back changes or step forwards programmatically to specific versions.
+		It works just like current() but ignores $config['migration_version'].
+	
+		https://www.codeigniter.com/user_guide/libraries/migration.html#CI_Migration::version
+	*/
+	public function versionCliAction($version=null) {
+		if ((int)$version < 1) {
+			ci('console')->error('Please provide version number.');
+		}
+
+		$this->responds = ci('migration')->version($version);
+	}
+
+	/**
+	Builds a standard migration template
+	*/
+	public function createCliAction($description=null) {
 		if (empty($description)) {
-			$this->console->error('description not specified.');
+			ci('console')->error('description not specified.');
 		}
 
-		$results = $this->migration_extras->create($description);
-
-		$this->console->e('<yellow>'.$results);
+		ci('console')->e('<yellow>'.ci('create_migration_file')->create($description));
+		
+		exit(0);
 	}
 
-	public function composerCliAction() {
-		chdir(ROOTPATH);
+	public function _output($output) {
+		if (is_scalar($this->responds)) {
+			ci('console')->e($this->responds);
+		} elseif (is_array($this->responds)) {
+			foreach ($this->responds as $o) {
+				ci('console')->e(trim($o));
+			}
+		}
 
-		echo getcwd().chr(10);
+		/* did we get any errors? */
+		$errors = trim(ci('migration')->error_string());
 
-		passthru('composer update');
-	}
-
-	public function site_upCliAction() {
-		ci('orange_tools')->site_up();
-	}
-
-	public function site_downCliAction() {
-		ci('orange_tools')->site_down();
+		if (!empty($errors)) {
+			ci('console')->error($errors);
+		}
 	}
 
 } /* end class */
