@@ -400,10 +400,10 @@ class Console {
 			fwrite(STDERR, "\007");
 		}
 	}
-	
+
 	public function line($length=null,$char='-') {
 		$length = ($length) ? (int)$length : $this->getWidth();
-	
+
 		return $this->e(str_pad('',$length,$char));
 	}
 

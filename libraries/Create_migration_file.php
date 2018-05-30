@@ -17,7 +17,7 @@ class Create_migration_file {
 
 		return 'Created: '.$file;
 	}
-	
+
 	/* protected */
 	protected function get_next_sequential() {
 		$folder = config('migration.migration_path');

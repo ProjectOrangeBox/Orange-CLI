@@ -3,14 +3,14 @@
 class MigrateController extends MY_Controller {
 	/* https://www.codeigniter.com/user_guide/libraries/migration.html */
 	public $responds = null;
-	
+
 	/**
 		Wrapper for migrate/current
 	*/
 	public function upCliAction() {
 		$this->currentCliAction();
 	}
-	
+
 	/**
 		Wrapper for migrate/version/###
 	*/
@@ -19,26 +19,26 @@ class MigrateController extends MY_Controller {
 	}
 
 	/* built in functions */
-	
+
 	/**
 		Migrates up to the current version
 		whatever is set for $config['migration_version'] in application/config/migration.php.
-	
+
 		https://www.codeigniter.com/user_guide/libraries/migration.html#CI_Migration::current
 	*/
 	public function currentCliAction() {
 		$mixed = ci('migration')->current();
-		
+
 		if ($mixed) {
-			
+
 		} else {
-		
+
 		}
 	}
 
 	/**
 		Return an array of migration filenames that are found in the migration_path property.
-		
+
 		https://www.codeigniter.com/user_guide/libraries/migration.html#CI_Migration::find_migrations
 	*/
 	public function findCliAction() {
@@ -58,7 +58,7 @@ class MigrateController extends MY_Controller {
 	/**
 		Version can be used to roll back changes or step forwards programmatically to specific versions.
 		It works just like current() but ignores $config['migration_version'].
-	
+
 		https://www.codeigniter.com/user_guide/libraries/migration.html#CI_Migration::version
 	*/
 	public function versionCliAction($version=null) {
@@ -78,7 +78,7 @@ class MigrateController extends MY_Controller {
 		}
 
 		ci('console')->e('<yellow>'.ci('create_migration_file')->create($description));
-		
+
 		exit(0);
 	}
 

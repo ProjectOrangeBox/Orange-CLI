@@ -36,21 +36,21 @@ class Orange_cli_library {
 			foreach ($methods as $method=>$extras) {
 				if ($extras['request_method'] == 'cli') {
 					ci('console')->line();
-					
+
 					$d = trim($extras['directory'],'/');
 					$c = trim($extras['human_controller'],'/');
 					$m = trim($extras['human_method'],'/');
-					
+
 					ci('console')->e(str_replace('/','<blue>/</blue>',trim(strtolower($d.'/'.$c.'/'.$m),'/')));
-					
+
 					if (strlen($extras['comments'])) {
 						$lines = explode(PHP_EOL,trim(substr($extras['comments'],3,-2)));
 						$formatted = [];
-						
+
 						foreach ($lines as $l) {
 							$formatted[] = trim($l);
 						}
-						
+
 						ci('console')->e('<light_cyan>'.implode($formatted,PHP_EOL).'</light_cyan>');
 					}
 				}
