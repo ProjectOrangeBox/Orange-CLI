@@ -1,11 +1,19 @@
 <?php
 
 class HelpController extends MY_Controller {
+	public $dump;
 
+	public function __construct() {
+		parent::__construct();
+
+		require __DIR__.'/../../libraries/Dump.php';
+		
+		$this->dump = new Dump;
+	}
 	/**
 		Show all of the available Command Line Functions
 	*/
 	public function indexCliAction() {
-		ci('orange_cli_library')->cli_list();
+		$this->dump->cli_list();
 	}
 }

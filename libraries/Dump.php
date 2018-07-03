@@ -1,15 +1,18 @@
 <?php
 
-class Orange_cli_library {
-	protected $output = [];
+class Dump {
 	protected $controllers = [];
+	protected $console;
 
-	public function output($combined=null) {
-		return ($combined) ? implode($combined,$this->output) : $this->output;
+	public function __construct() {
+		require __DIR__.'/Console.php';
+		
+		$this->console = new Console;
 	}
 
-	public function auto_add_permissions() {
+	public function permissions() {
 		$controllers = $this->get_controllers_methods();
+		$text = '';
 
 		foreach ($controllers as $controller=>$methods) {
 			foreach ($methods as $method=>$extras) {
@@ -18,30 +21,33 @@ class Orange_cli_library {
 					$group = filter('human',$extras['human_controller']);
 					$description = filter('human',$extras['directory'].' '.$extras['request_method'].' '.$extras['human_controller'].' '.$extras['human_method']);
 
-					if (ci('o_permission_model')->add($key,$group,$description)) {
-						/* this was added */
-						$this->output[] = '<yellow>'.trim($extras['directory'].' <red>'.$extras['human_controller'].' <yellow>'.$extras['human_method'].' <green>'.$extras['request_method']).'\n';
-					}
+					$text .= '{'.chr(10);
+					$text .= chr(9).'"key": "'.$key.'",'.chr(10);
+					$text .= chr(9).'"description": "'.$description.'"'.chr(10);
+					$text .= '},'.chr(10);
 				}
 			}
 		}
+		
+		echo substr($text,0,-2).chr(10);
 
 		return $this;
 	}
-
+	
+	/* get all cli commands from all controllers */
 	public function cli_list() {
 		$controllers = $this->get_controllers_methods();
 
 		foreach ($controllers as $controller=>$methods) {
 			foreach ($methods as $method=>$extras) {
 				if ($extras['request_method'] == 'cli') {
-					ci('console')->line();
+					$this->console->line();
 
 					$d = trim($extras['directory'],'/');
 					$c = trim($extras['human_controller'],'/');
 					$m = trim($extras['human_method'],'/');
 
-					ci('console')->e(str_replace('/','<blue>/</blue>',trim(strtolower($d.'/'.$c.'/'.$m),'/')));
+					$this->console->e(str_replace('/','<blue>/</blue>',trim(strtolower($d.'/'.$c.'/'.$m),'/')));
 
 					if (strlen($extras['comments'])) {
 						$lines = explode(PHP_EOL,trim(substr($extras['comments'],3,-2)));
@@ -51,7 +57,7 @@ class Orange_cli_library {
 							$formatted[] = trim($l);
 						}
 
-						ci('console')->e('<light_cyan>'.implode($formatted,PHP_EOL).'</light_cyan>');
+						$this->console->e('<light_cyan>'.implode($formatted,PHP_EOL).'</light_cyan>');
 					}
 				}
 			}
