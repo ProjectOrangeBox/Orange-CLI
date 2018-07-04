@@ -1,36 +1,29 @@
 <?php
 
 class Create_migration_file {
+	public $supplied_folder;
 
-	public function create($name=null) {
+	public function create($name=null,$folder=null) {
+		$folder = (!$folder) ? 	config('migration.migration_path') : $folder;
 		$name = ($name) ? filter('filename',$name) : 'migration';
-		$stamp = (config('migration.migration_type') == 'timestamp') ? date('YmdHis') : $this->get_next_sequential();
-		$folder = config('migration.migration_path');
-		$file = $folder.$stamp.'_'.$name.'.php';
+		$stamp = (config('migration.migration_type') == 'timestamp') ? date('YmdHis') : $this->get_next_sequential($folder);
+		$file = $folder.$stamp.'_'.$name.'.php';		
 		$template = $this->get_migration_template($name,$stamp);
 
 		if (!is_writable(rtrim($folder,'/'))) {
-			die('Can not write to '.rtrim($folder,'/').chr(10));
+			show_error('Can not write to '.rtrim($folder,'/').chr(10));
 		}
 
 		file_put_contents($file,$template);
 
-		return 'Created: '.$file;
+		echo 'Created: '.$file.chr(10);
 	}
 
 	/* protected */
-	protected function get_next_sequential() {
-		$folder = config('migration.migration_path');
-		$files = glob($folder.'*.php');
-		$highest = 0;
+	protected function get_next_sequential($folder) {
+		list($highest) = explode('_',basename(end(glob($folder.'*_*.php'))),1);
 
-		foreach ($files as $file) {
-			$parts = explode('_',basename($file));
-
-			$highest = (int)ltrim($parts[0],'0') + 1;
-		}
-
-		return substr('000'.$highest,-3);
+		return substr('000'.((int)$highest+1),-3);
 	}
 
 	protected function get_migration_template($name,$stamp) {
