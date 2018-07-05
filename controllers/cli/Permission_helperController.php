@@ -25,8 +25,10 @@ class Permission_helperController extends MY_Controller {
 					
 					$previous_group = $group;
 				}
-
-				echo "ci('o_permission_model')->add('".$key."','".$group."','".$description."');".chr(10);
+				
+				if ($request_method != 'cli') {
+					echo "ci('o_permission_model')->add('".$key."','".$group."','".$description."');".chr(10);
+				}
 			}
 			
 			echo chr(10);
