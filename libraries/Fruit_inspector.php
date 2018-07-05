@@ -3,6 +3,7 @@
 class Fruit_inspector {
 	protected $controllers = [];
 	protected $console;
+	protected $current_package = '';
 
 	public function __construct() {
 		require_once __DIR__.'/Console.php';
@@ -43,7 +44,7 @@ class Fruit_inspector {
 	}
 
 	/* internal */
-	protected function get_controllers_methods($all=false) {
+	public function get_controllers_methods($all=false) {
 		if ($all) {
 			$this->globr(ROOTPATH,'Controller.php');
 		} else {
@@ -51,7 +52,11 @@ class Fruit_inspector {
 
 			include ROOTPATH.'/application/config/autoload.php';
 
+			$autoload['packages'][] = ROOTPATH.'/application';
+
 			foreach ($autoload['packages'] as $path) {
+				$this->current_package = $path;
+			
 				$this->globr($path,'Controller.php');
 			}
 		}
@@ -117,6 +122,8 @@ class Fruit_inspector {
 					'request_method'=>$request_method,
 					'method'=>$raw_method,
 					'controller'=>$original_class_name.'Controller',
+					'package'=>$this->current_package,
+					'human_package'=>end(explode('/',$this->current_package)),
 				];
 			}
 		}
