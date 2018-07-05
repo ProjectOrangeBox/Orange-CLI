@@ -1,39 +1,56 @@
 <?php
 
 class MigrateController extends MY_Controller {
-	/* https://www.codeigniter.com/user_guide/libraries/migration.html */
-	public $responds = null;
+	protected $version_arg = 1;
+	protected $description_arg = 1;
+	protected $folder_arg = 1;
 
 	/**
 		Wrapper for migrate/current
 	*/
 	public function upCliAction() {
-		$this->currentCliAction();
+		$this->get_folder();
+
+		ci('package_migration_cli_wrapper')->latest();
 	}
 
 	/**
 		Wrapper for migrate/version/###
 	*/
-	public function downCliAction($version=null) {
-		$this->versionCliAction($version);
+	public function downCliAction() {
+		$this->get_folder();
+
+		ci('package_migration_cli_wrapper')->version((int)$this->get_section($this->version_arg,'version'));
 	}
 
 	/* built in functions */
 
 	/**
-		Migrates up to the current version
-		whatever is set for $config['migration_version'] in application/config/migration.php.
+		This works much the same way as current() but instead of looking for the $config['migration_version']
+		the Migration class will use the very newest migration found in the filesystem.
 
-		https://www.codeigniter.com/user_guide/libraries/migration.html#CI_Migration::current
+		https://www.codeigniter.com/user_guide/libraries/migration.html#CI_Migration::latest
+
+		TRUE if no migrations are found, current version string on success, FALSE on failure
+		*/
+	public function latestCliAction() {
+		$this->get_folder();
+
+		ci('package_migration_cli_wrapper')->latest();
+	}
+
+	/**
+		Version can be used to roll back changes or step forwards programmatically to specific versions.
+		It works just like current() but ignores $config['migration_version'].
+
+		https://www.codeigniter.com/user_guide/libraries/migration.html#CI_Migration::version
+
+		TRUE if no migrations are found, current version string on success, FALSE on failure
 	*/
-	public function currentCliAction() {
-		$mixed = ci('migration')->current();
+	public function versionCliAction() {
+		$this->get_folder();
 
-		if ($mixed) {
-
-		} else {
-
-		}
+		ci('package_migration_cli_wrapper')->version((int)$this->get_section($this->version_arg,'version'));
 	}
 
 	/**
@@ -42,61 +59,62 @@ class MigrateController extends MY_Controller {
 		https://www.codeigniter.com/user_guide/libraries/migration.html#CI_Migration::find_migrations
 	*/
 	public function findCliAction() {
-		$this->responds = ci('migration')->find_migrations();
-	}
+		require APPPATH.'/config/autoload.php';
 
-	/**
-		This works much the same way as current() but instead of looking for the $config['migration_version']
-		the Migration class will use the very newest migration found in the filesystem.
+		ci('package_migration_cli_wrapper')->set_path()->find();
 
-		https://www.codeigniter.com/user_guide/libraries/migration.html#CI_Migration::latest
-	*/
-	public function latestCliAction() {
-		$this->responds = ci('migration')->latest();
-	}
-
-	/**
-		Version can be used to roll back changes or step forwards programmatically to specific versions.
-		It works just like current() but ignores $config['migration_version'].
-
-		https://www.codeigniter.com/user_guide/libraries/migration.html#CI_Migration::version
-	*/
-	public function versionCliAction($version=null) {
-		if ((int)$version < 1) {
-			ci('console')->error('Please provide version number.');
+		foreach ($autoload['packages'] as $package) {
+			ci('package_migration_cli_wrapper')->set_path($package.'/support/migrations/')->find($package);
 		}
-
-		$this->responds = ci('migration')->version($version);
 	}
 
 	/**
 	Builds a standard migration template
 	*/
-	public function createCliAction($description=null) {
-		if (empty($description)) {
-			ci('console')->error('description not specified.');
-		}
+	public function createCliAction() {
+		$this->get_folder();
 
-		ci('console')->e('<yellow>'.ci('create_migration_file')->create($description));
-
-		exit(0);
+		ci('package_migration_cli_wrapper')->create($this->get_section($this->description_arg,'description'));
 	}
 
-	public function _output($output) {
-		if (is_scalar($this->responds)) {
-			ci('console')->e($this->responds);
-		} elseif (is_array($this->responds)) {
-			foreach ($this->responds as $o) {
-				ci('console')->e(trim($o));
+	protected function get_folder() {
+		/* did they include anything? */
+		$raw_folder = $this->get_section($this->folder_arg,'package folder',false);
+
+		/* is arg1 a folder */
+		if (strpos($raw_folder,'/') !== false) {
+			$this->version_arg++;
+			$this->description_arg++;
+
+			/* verify it's a valid package */
+			$folder = ROOTPATH.'/'.trim($raw_folder,'/');
+
+			if (!file_exists($folder)) {
+				show_error('"'.$raw_folder.'" does not seem to be a valid package path.');
+			}
+
+			/* verify it has a valid migration folder */
+			$folder .='/support/migrations';
+
+			if (!file_exists($folder)) {
+				show_error('"'.$raw_folder.'" does not seem to be a valid package migration path.');
+			}
+
+			ci('package_migration_cli_wrapper')->set_path($folder.'/');
+		}
+	}
+
+	protected function get_section($num,$text,$required=true) {
+		/* the first useable arg is 2 */
+		$num = $num + 1;
+
+		if ($required) {
+			if (trim($_SERVER['argv'][$num]) == '') {
+				show_error('Please provide a '.$text.'.');
 			}
 		}
 
-		/* did we get any errors? */
-		$errors = trim(ci('migration')->error_string());
-
-		if (!empty($errors)) {
-			ci('console')->error($errors);
-		}
+		return $_SERVER['argv'][$num];
 	}
 
 } /* end class */

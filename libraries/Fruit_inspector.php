@@ -1,39 +1,15 @@
 <?php
 
-class Dump {
+class Fruit_inspector {
 	protected $controllers = [];
 	protected $console;
 
 	public function __construct() {
-		require __DIR__.'/Console.php';
+		require_once __DIR__.'/Console.php';
 		
 		$this->console = new Console;
 	}
 
-	public function permissions() {
-		$controllers = $this->get_controllers_methods();
-		$text = '';
-
-		foreach ($controllers as $controller=>$methods) {
-			foreach ($methods as $method=>$extras) {
-				if ($extras['request_method'] != 'cli') {
-					$key = 'url::/'.strtolower($extras['directory'].$extras['human_controller'].'::'.$extras['human_method'].'~'.$extras['request_method']);
-					$group = filter('human',$extras['human_controller']);
-					$description = filter('human',$extras['directory'].' '.$extras['request_method'].' '.$extras['human_controller'].' '.$extras['human_method']);
-
-					$text .= '{'.chr(10);
-					$text .= chr(9).'"key": "'.$key.'",'.chr(10);
-					$text .= chr(9).'"description": "'.$description.'"'.chr(10);
-					$text .= '},'.chr(10);
-				}
-			}
-		}
-		
-		echo substr($text,0,-2).chr(10);
-
-		return $this;
-	}
-	
 	/* get all cli commands from all controllers */
 	public function cli_list() {
 		$controllers = $this->get_controllers_methods();
@@ -47,7 +23,7 @@ class Dump {
 					$c = trim($extras['human_controller'],'/');
 					$m = trim($extras['human_method'],'/');
 
-					$this->console->e(str_replace('/','<blue>/</blue>',trim(strtolower($d.'/'.$c.'/'.$m),'/')));
+					$this->console->e(str_replace('/','/',trim(strtolower($d.'/'.$c.'/'.$m),'/')));
 
 					if (strlen($extras['comments'])) {
 						$lines = explode(PHP_EOL,trim(substr($extras['comments'],3,-2)));

@@ -48,56 +48,49 @@
  * @author		Reactor Engineers
  * @link
  */
-class Migration_handler {
-
-	/**
-	 * Whether the library is enabled
-	 *
-	 * @var bool
-	 */
-	public $_migration_enabled = FALSE;
+class Package_migration {
 
 	/**
 	 * Path to migration classes
 	 *
 	 * @var string
 	 */
-	public $_migration_path = NULL;
+	protected $_migration_path = NULL;
 
 	/**
 	 * Current migration version
 	 *
 	 * @var mixed
 	 */
-	public $_migration_version = 0;
+	protected $_migration_version = 0;
 
 	/**
 	 * Database table with migration info
 	 *
 	 * @var string
 	 */
-	public $_migration_table = 'orange_packge_migrations';
+	protected $_migration_table = 'orange_packge_migrations';
 
 	/**
 	 * Whether to automatically run migrations
 	 *
 	 * @var	bool
 	 */
-	public $_migration_auto_latest = FALSE;
+	protected $_migration_auto_latest = FALSE;
 
 	/**
 	 * Migration basename regex
 	 *
 	 * @var string
 	 */
-	public $_migration_regex;
+	protected $_migration_regex = '/^\d{3}_(\w+)$/';
 
 	/**
 	 * Error message
 	 *
 	 * @var string
 	 */
-	public $_error_string = '';
+	protected $_error_string = '';
 
 	/**
 	 * Initialize Migration Class
@@ -108,11 +101,15 @@ class Migration_handler {
 	public function __construct() {
 		log_message('info', 'Migrations Class Initialized');
 
-		// If not set, set it
-		$this->_migration_path !== '' OR $this->_migration_path = APPPATH.'migrations/';
+		// Are they trying to use migrations while it is disabled?
+		if (config('migration.migration_enabled') !== TRUE) 	{
+			show_error('Migrations has been loaded but is disabled or set up incorrectly.');
+		}
 
-		// Add trailing slash if not set
-		$this->_migration_path = rtrim($this->_migration_path, '/').'/';
+		$this->_migration_version = config('migration.migration_version');
+		$this->_migration_table = 'orange_packge_migrations';
+
+		$this->set_path(config('migration.migration_path'));
 
 		// Load migration language
 		$this->lang->load('migration');
@@ -125,9 +122,6 @@ class Migration_handler {
 			show_error('Migrations configuration file (migration.php) must have "migration_table" set.');
 		}
 
-		// Migration basename regex
-		$this->_migration_regex = '/^\d{3}_(\w+)$/';
-
 		// If the migrations table is missing, make it
 		if (!$this->db->table_exists($this->_migration_table)) {
 			$this->dbforge->add_field([
@@ -135,11 +129,11 @@ class Migration_handler {
 				'version' => ['type' => 'BIGINT', 'constraint' => 20],
 			]);
 
+			$this->dbforge->add_key('package', TRUE);
+
 			$this->dbforge->create_table($this->_migration_table, TRUE);
 		}
 	}
-
-	// --------------------------------------------------------------------
 
 	/**
 	 * Migrate to a schema version
@@ -160,7 +154,7 @@ class Migration_handler {
 
 		if ($target_version > 0 && ! isset($migrations[$target_version])) {
 			$this->_error_string = sprintf($this->lang->line('migration_not_found'), $target_version);
-			
+
 			return FALSE;
 		}
 
@@ -211,17 +205,17 @@ class Migration_handler {
 			$previous = $number;
 
 			include_once($file);
-			
+
 			$class = 'Migration_'.ucfirst(strtolower($this->_get_migration_name(basename($file, '.php'))));
 
 			// Validate the migration file structure
 			if ( ! class_exists($class, FALSE)) 	{
 				$this->_error_string = sprintf($this->lang->line('migration_class_doesnt_exist'), $class);
-				
+
 				return FALSE;
 			} elseif ( ! is_callable([$class, $method])) 	{
 				$this->_error_string = sprintf($this->lang->line('migration_missing_'.$method.'_method'), $class);
-				
+
 				return FALSE;
 			}
 
@@ -232,9 +226,22 @@ class Migration_handler {
 		foreach ($pending as $number => $migration) 	{
 			log_message('debug', 'Migrating '.$method.' from version '.$current_version.' to version '.$number);
 
-			$migration[0] = new $migration[0];
-			call_user_func($migration);
+			$migration[0] = new $migration[0]();
+			
+			$success = call_user_func($migration); /* migrations must return true to continue */
+
+			if (!$success) {
+				$error_string = $migration[0]->error_string();
+			
+				$this->_error_string = trim('Error Migrating '.$method.' from version '.$current_version.' to version '.$number.chr(10).$error_string);
+
+				log_message('debug', $this->_error_string);
+				
+				return FALSE;
+			}
+			
 			$current_version = $number;
+			
 			$this->_update_version($current_version);
 		}
 
@@ -242,15 +249,14 @@ class Migration_handler {
 		// will be the down() method for the next migration up from the target
 		if ($current_version <> $target_version) {
 			$current_version = $target_version;
+			
 			$this->_update_version($current_version);
 		}
 
 		log_message('debug', 'Finished migrating to '.$current_version);
-		
+
 		return $current_version;
 	}
-
-	// --------------------------------------------------------------------
 
 	/**
 	 * Sets the schema to the latest migration
@@ -262,7 +268,7 @@ class Migration_handler {
 
 		if (empty($migrations)) {
 			$this->_error_string = $this->lang->line('migration_none_found');
-			
+
 			return FALSE;
 		}
 
@@ -273,8 +279,6 @@ class Migration_handler {
 		return $this->version($this->_get_migration_number($last_migration));
 	}
 
-	// --------------------------------------------------------------------
-
 	/**
 	 * Sets the schema to the migration version set in config
 	 *
@@ -284,8 +288,6 @@ class Migration_handler {
 		return $this->version($this->_migration_version);
 	}
 
-	// --------------------------------------------------------------------
-
 	/**
 	 * Error string
 	 *
@@ -294,8 +296,6 @@ class Migration_handler {
 	public function error_string() {
 		return $this->_error_string;
 	}
-
-	// --------------------------------------------------------------------
 
 	/**
 	 * Retrieves list of available migration scripts
@@ -316,7 +316,7 @@ class Migration_handler {
 				// There cannot be duplicate migration numbers
 				if (isset($migrations[$number])) {
 					$this->_error_string = sprintf($this->lang->line('migration_multiple_version'), $number);
-					
+
 					show_error($this->_error_string);
 				}
 
@@ -329,8 +329,6 @@ class Migration_handler {
 		return $migrations;
 	}
 
-	// --------------------------------------------------------------------
-
 	/**
 	 * Extracts the migration number from a filename
 	 *
@@ -338,11 +336,8 @@ class Migration_handler {
 	 * @return	string	Numeric portion of a migration filename
 	 */
 	protected function _get_migration_number($migration) {
-		return sscanf($migration, '%[0-9]+', $number)
-			? $number : '0';
+		return sscanf($migration, '%[0-9]+', $number) ? $number : '0';
 	}
-
-	// --------------------------------------------------------------------
 
 	/**
 	 * Extracts the migration class name from a filename
@@ -358,21 +353,43 @@ class Migration_handler {
 		return implode('_', $parts);
 	}
 
-	// --------------------------------------------------------------------
-
 	/**
 	 * Retrieves current schema version
 	 *
 	 * @return	string	Current migration version
 	 */
 	public function get_version() {
-		$row = $this->db->select('version')->where(['package'=>$this->prep_package()])->get($this->_migration_table)->row();
+		$row = $this->db->select('version')->where(['package'=>$this->prep_package($this->_migration_path)])->get($this->_migration_table)->row();
 
 		return $row ? $row->version : '0';
 	}
 
-	// --------------------------------------------------------------------
 
+	public function set_path($path = null) {
+		$this->_migration_path = ($path) ? rtrim($path,'/').'/' : rtrim(config('migration.migration_path'),'/');
+
+		return $this;
+	}
+
+	public function create($description) {
+		$name = ($name) ? filter('filename',$description) : 'migration';
+		$stamp = (config('migration.migration_type') == 'timestamp') ? date('YmdHis') : $this->get_next_sequential($this->_migration_path);
+		$file = $this->_migration_path.$stamp.'_'.$name.'.php';
+		$template = file_get_contents(__DIR__.'/Migration_template.tmpl');
+		$data = [
+			'name'=>$name,
+			'stamp'=>$stamp,
+			'ucfirst'=>ucfirst($name),
+		];
+		$php = ci('parser')->parse_string($template,$data,true);
+
+		if (!is_writable(rtrim($this->_migration_path,'/'))) {
+			show_error('Can not write to '.rtrim($this->_migration_path,'/').chr(10));
+		}
+
+		return (file_put_contents($file,$php)) ? $file : false;
+	}
+	
 	/**
 	 * Stores the current schema version
 	 *
@@ -380,15 +397,20 @@ class Migration_handler {
 	 * @return	void
 	 */
 	protected function _update_version($migration) {
-		$this->db->replace($this->_migration_table,['package'=>$this->prep_package(),'version'=>$migration]);
+		$this->db->replace($this->_migration_table,['package'=>$this->prep_package($this->_migration_path),'version'=>$migration]);
 	}
 
-	protected function prep_package() {
-		return str_replace([ROOTPATH,'/support/migrations/'],'',$this->_migration_path);
+	protected function prep_package($path) {
+		$prep = str_replace([ROOTPATH,'/support/migrations/'],'',$path);
+
+		return (empty($prep) ? '/application' : $prep);
 	}
 
+	protected function get_next_sequential($folder) {
+		list($highest) = explode('_',basename(end(glob($folder.'*_*.php'))),1);
 
-	// --------------------------------------------------------------------
+		return substr('000'.((int)$highest+1),-3);
+	}
 
 	/**
 	 * Enable the use of CI super-global

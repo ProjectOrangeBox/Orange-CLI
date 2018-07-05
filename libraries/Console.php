@@ -152,7 +152,31 @@ class Console {
 	}
 
 	public function error($input,$die=true) {
-		return $this->out('<light_red>'.$input.PHP_EOL,$die,'STDERR');
+		return $this->out('<light_red>'.$input.'</off>'.PHP_EOL,$die,'STDERR');
+	}
+	
+	public function heading($txt) {
+		$this->e('<cyan>'.str_pad('- '.$txt.' ',exec('tput cols'),'-',STR_PAD_RIGHT).'</off>');
+	}
+
+	public function sub_heading($txt) {
+		$this->e('<blue> ## '.$txt.' ##</off>');
+	}
+
+	public function success($txt) {
+		$this->e('<green>(*) '.$txt.'</off>');
+	}
+
+	public function info($txt) {
+		$this->e('<cyan>(?) '.$txt.'</off>');
+	}
+
+	public function warning($txt) {
+		$this->e('<yellow>/!\ '.$txt.'</off>');
+	}
+
+	public function danger($txt) {
+		$this->e('<red>(/) '.$txt.'</off>');
 	}
 
 	/**
