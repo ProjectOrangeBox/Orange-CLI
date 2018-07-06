@@ -164,19 +164,19 @@ class Console {
 	}
 
 	public function success($txt) {
-		$this->e('<green>(*) '.$txt.'</off>');
+		$this->e('<green>✓ '.$txt.'</off>');
 	}
 
 	public function info($txt) {
-		$this->e('<cyan>(?) '.$txt.'</off>');
+		$this->e('<cyan>? '.$txt.'</off>');
 	}
 
 	public function warning($txt) {
-		$this->e('<yellow>/!\ '.$txt.'</off>');
+		$this->e('<yellow>⚠ '.$txt.'</off>');
 	}
 
 	public function danger($txt) {
-		$this->e('<red>(/) '.$txt.'</off>');
+		$this->e('<red>X '.$txt.'</off>');
 	}
 
 	/**

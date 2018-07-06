@@ -69,7 +69,7 @@ class Package_migration {
 	 *
 	 * @var string
 	 */
-	protected $_migration_table = 'orange_packge_migrations';
+	protected $_migration_table = '';
 
 	/**
 	 * Whether to automatically run migrations
@@ -107,7 +107,7 @@ class Package_migration {
 		}
 
 		$this->_migration_version = config('migration.migration_version');
-		$this->_migration_table = 'orange_packge_migrations';
+		$this->_migration_table = config('migration.migration_table');
 
 		$this->set_path(config('migration.migration_path'));
 
@@ -133,6 +133,11 @@ class Package_migration {
 
 			$this->dbforge->create_table($this->_migration_table, TRUE);
 		}
+		
+		if (count($this->db->list_fields($this->_migration_table)) == 1) {
+			show_error('Your migration table "'.$this->_migration_table.'" is not package compatible. Please delete "'.$this->_migration_table.'" and let the Package_migration class create it. Then only use the package migration class since it can handle multiple packages.');
+		}
+		
 	}
 
 	/**
@@ -199,17 +204,19 @@ class Package_migration {
 			// Check for sequence gaps
 			if (isset($previous) && abs($number - $previous) > 1) 	{
 				$this->_error_string = sprintf($this->lang->line('migration_sequence_gap'), $number);
+				
 				return FALSE;
 			}
 
 			$previous = $number;
 
-			include_once($file);
-
-			$class = 'Migration_'.ucfirst(strtolower($this->_get_migration_name(basename($file, '.php'))));
+			include_once $file;
+			
+			/* full filename used so we don't run into other migration classes that have the same name but a different version */
+			$class = 'Migration_'.ucfirst(strtolower(basename($file,'.php')));
 
 			// Validate the migration file structure
-			if ( ! class_exists($class, FALSE)) 	{
+			if (!class_exists($class, FALSE)) 	{
 				$this->_error_string = sprintf($this->lang->line('migration_class_doesnt_exist'), $class);
 
 				return FALSE;
@@ -340,20 +347,6 @@ class Package_migration {
 	}
 
 	/**
-	 * Extracts the migration class name from a filename
-	 *
-	 * @param	string	$migration
-	 * @return	string	text portion of a migration filename
-	 */
-	protected function _get_migration_name($migration) {
-		$parts = explode('_', $migration);
-
-		array_shift($parts);
-
-		return implode('_', $parts);
-	}
-
-	/**
 	 * Retrieves current schema version
 	 *
 	 * @return	string	Current migration version
@@ -372,22 +365,25 @@ class Package_migration {
 	}
 
 	public function create($description) {
-		$name = ($name) ? filter('filename',$description) : 'migration';
+		$name = ($description) ? filter('filename',$description) : 'migration';
 		$stamp = (config('migration.migration_type') == 'timestamp') ? date('YmdHis') : $this->get_next_sequential($this->_migration_path);
 		$file = $this->_migration_path.$stamp.'_'.$name.'.php';
 		$template = file_get_contents(__DIR__.'/Migration_template.tmpl');
-		$data = [
-			'name'=>$name,
-			'stamp'=>$stamp,
-			'ucfirst'=>ucfirst($name),
-		];
-		$php = ci('parser')->parse_string($template,$data,true);
+		$php = ci('parser')->parse_string($template,['name'=>basename($file,'.php')],true);
 
 		if (!is_writable(rtrim($this->_migration_path,'/'))) {
 			show_error('Can not write to '.rtrim($this->_migration_path,'/').chr(10));
 		}
 
-		return (file_put_contents($file,$php)) ? $file : false;
+		@unlink($file);
+
+		$written = (file_put_contents($file,$php)) ? $file : false;
+		
+		if ($written) {
+			chmod($file,0777);
+		}
+		
+		return $written;
 	}
 	
 	/**

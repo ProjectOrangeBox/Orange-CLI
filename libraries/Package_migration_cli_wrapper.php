@@ -27,15 +27,15 @@ class Package_migration_cli_wrapper {
 		if (count($found)) {
 			$highest = ci('package_migration')->get_version();
 
-			$this->console->sub_heading('Current Version '.$highest);
+			//$this->console->sub_heading('Current Version '.$highest);
 
 			foreach ($found as $num=>$value) {
-				$text = str_pad($num,6).basename($value);
+				$text = substr_replace(basename($value),' ',3,1);
 
 				if ((int)$num <= $highest) {
-						$this->console->warning($text);
+						$this->console->success($text);
 				} else {
-						$this->console->info($text);
+						$this->console->e('  '.$text);
 				}
 			}
 		}
@@ -46,7 +46,7 @@ class Package_migration_cli_wrapper {
 
 		$text = (empty($folder)) ? config('migration.migration_path') : $folder;
 
-		$this->console->info('Path switched to '.strip_rp($text));
+		$this->console->heading('Path switched to '.strip_rp($text));
 	
 		return $this;
 	}

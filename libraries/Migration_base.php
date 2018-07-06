@@ -43,34 +43,37 @@ class Migration_base {
 	}
 
 	protected function _get_package() {
-		$child = debug_backtrace(null, 1);
+		$child = debug_backtrace(null,3);
 		
-		return strip_rp(dirname(dirname(dirname($child[0]['file']))));
+		return strip_rp(dirname(dirname(dirname($child[1]['file']))));
 	}
 
 	protected function _copy_config($filename) {
-		$package_folder = $this->_get_package();
+		$filename = trim($filename,'/');
 
-		$name = basename($filename,'.php');
-		$config_file = '/config/' . $name . '.php';
+		$package_folder = $this->_get_package();
+		$package_config = $package_folder.'/'.$filename;
+		$config_file = 'config/'.basename($filename);
+
 		$success = true;
 
-		if (file_exists(ROOTPATH.$package_folder.$config_file)) {
+		if (file_exists(ROOTPATH.$package_config)) {
 			if (is_writable(APPPATH.'config')) {
-				$success = copy(ROOTPATH.$package_folder.$config_file,rtrim(APPPATH, '/').$config_file);
+				$success = copy(ROOTPATH.$package_config,APPPATH.$config_file);
 			} else {
 				show_error('Can not write to "'.APPPATH.'config"');
 			}
 		} else {
-			show_error('Could not locate the specified config file "'.$package_folder.$config_file.'"');
+			show_error('Could not locate the specified config file "'.$package_config.'"');
 		}
 
 		return $success;
 	}
 
-	protected function _remove_config($filename) {
+	protected function _unlink_config($filename) {
 		$name = basename($filename,'.php');
 		$config_file = 'config/'.$name.'.php';
+
 		$success     = true;
 
 		if (file_exists(APPPATH.$config_file)) {
@@ -80,10 +83,9 @@ class Migration_base {
 		return $success;
 	}
 
-	protected function _add_symlink($from_path,$to_path) {
-		$package_folder = $this->_get_package().'/'.$from_path;
-
-		$public_folder = WWW.'/'.$to_path;
+	protected function _link_public($path) {
+		$package_folder = ROOTPATH.$this->_get_package().'/public/'.ltrim($path,'/');
+		$public_folder = WWW.'/'.ltrim($path,'/');
 
 		/* let's make the public path if it's not there */
 		$drop_folder = dirname($public_folder);
@@ -93,31 +95,33 @@ class Migration_base {
 		}
 
 		/* remove the link/file if it's there */
-		$this->remove_symlink($to_path);
+		@unlink($public_folder);
 
-		if (!$this->relative_symlink($package_folder, $public_folder)) {
+		if (!$this->_relative_symlink($package_folder, $public_folder)) {
 			show_error('Could not symlink package folder to public location.');
 		}
 
 		return true;
 	}
 
-	protected function _remove_symlink($path) {
-		return unlink(WWW.'/'.trim($path, '/'));
+	protected function _unlink_public($path) {
+		$public_folder = WWW.'/'.ltrim($path,'/');
+
+		return unlink($public_folder);
 	}
 	
 	/* these are only added to the var folder */
 	protected function _add_rw_folder($path) {
-		$var_folder = ROOTPATH.dirname(site_url('{uploads}'));
+		$var_folder = dirname(path('{rootpath}{uploads}'));
 
-		return (is_writable($var_folder)) ? mkdir($var_folder.'/'.rtrim($name,'/'),0777,true) : false;
+		return (is_writable($var_folder)) ? mkdir($var_folder.'/'.rtrim($path,'/'),0777,true) : false;
 	}
 
 	/* these are only removed from the var folder */
 	protected function _remove_rw_folder($path) {
-		$var_folder = ROOTPATH.dirname(site_url('{uploads}'));
+		$var_folder = dirname(path('{rootpath}{uploads}'));
 	
-		return $this->_rmdirr($var_folder.'/'.rtrim($name,'/'));
+		return $this->_rmdirr($var_folder.'/'.rtrim($path,'/'));
 	}
 
 	protected function _rmdirr($directory) {
