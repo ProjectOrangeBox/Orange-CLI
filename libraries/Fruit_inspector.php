@@ -2,46 +2,7 @@
 
 class Fruit_inspector {
 	protected $controllers = [];
-	protected $console;
 	protected $current_package = '';
-
-	public function __construct() {
-		require_once __DIR__.'/Console.php';
-		
-		$this->console = new Console;
-	}
-
-	/* get all cli commands from all controllers */
-	public function cli_list() {
-		$controllers = $this->get_controllers_methods();
-
-		foreach ($controllers as $controller=>$methods) {
-			foreach ($methods as $method=>$extras) {
-				if ($extras['request_method'] == 'cli') {
-					$this->console->line();
-
-					$d = trim($extras['directory'],'/');
-					$c = trim($extras['human_controller'],'/');
-					$m = trim($extras['human_method'],'/');
-
-					$this->console->e(str_replace('/','/',trim(strtolower($d.'/'.$c.'/'.$m),'/')));
-
-					if (strlen($extras['comments'])) {
-						$lines = explode(PHP_EOL,trim(substr($extras['comments'],3,-2)));
-						$formatted = [];
-
-						foreach ($lines as $l) {
-							$formatted[] = trim($l);
-						}
-
-						$this->console->e('<light_cyan>'.implode($formatted,PHP_EOL).'</light_cyan>');
-					}
-				}
-			}
-		}
-
-		return $this;
-	}
 
 	/* internal */
 	public function get_controllers_methods($all=false) {
@@ -56,7 +17,7 @@ class Fruit_inspector {
 
 			foreach ($autoload['packages'] as $path) {
 				$this->current_package = $path;
-			
+
 				$this->globr($path,'Controller.php');
 			}
 		}
@@ -97,6 +58,32 @@ class Fruit_inspector {
 		$new_class_name = basename($new_class_file,'.php');
 
 		$class = new ReflectionClass($new_class_name);
+
+		/* go up the tree */
+		$parent_class = $class;
+		$class_parents = [];
+
+		while ($parent = $parent_class->getParentClass()) {
+			$class_parents[] = $parent->getName();
+
+			$parent_class = $parent;
+		}
+
+		$this->controllers[$pathinfo['filename']]['controller'] = [
+			'directory'=>$directory,
+			'human_controller'=>$original_class_name,
+			'controller'=>$original_class_name.'Controller',
+			'parents'=>$class_parents,
+			'package'=>$this->current_package,
+			'human_package'=>end(explode('/',$this->current_package)),
+			'properties'=>[
+				'public'=>$class->getProperties(ReflectionProperty::IS_PUBLIC),
+				'protected'=>$class->getProperties(ReflectionProperty::IS_PROTECTED),
+				'static'=>$class->getProperties(ReflectionProperty::IS_STATIC),
+				'private'=>$class->getProperties(ReflectionProperty::IS_PRIVATE),
+			],
+		];
+
 		$methods = $class->getMethods(ReflectionMethod::IS_PUBLIC);
 
 		foreach ($methods as $idx=>$ref_method) {
@@ -124,6 +111,7 @@ class Fruit_inspector {
 					'controller'=>$original_class_name.'Controller',
 					'package'=>$this->current_package,
 					'human_package'=>end(explode('/',$this->current_package)),
+					'properties'=>$class->getMethod($raw_method)->getParameters($raw_method),
 				];
 			}
 		}
