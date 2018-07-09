@@ -1,7 +1,6 @@
 <?php
 
 class HelpController extends MY_Controller {
-	protected $console;
 	/**
 		Show all of the available Command Line Functions
 	*/
