@@ -97,7 +97,11 @@ class MigrateController extends MY_Controller {
 			$folder .='/support/migrations';
 
 			if (!file_exists($folder)) {
-				show_error('"'.$raw_folder.'" does not seem to be a valid package migration path.');
+				mkdir($folder,0777,true);
+				
+				if (!file_exists($folder)) {
+					show_error('"'.$raw_folder.'" does not seem to be a valid package migration path.');
+				}
 			}
 
 			ci('package_migration_cli_wrapper')->set_path($folder.'/');

@@ -33,9 +33,9 @@ class Package_migration_cli_wrapper {
 				$text = substr_replace(basename($value),' ',3,1);
 
 				if ((int)$num <= $highest) {
-						$this->console->success($text);
+						$this->console->success('   '.$text);
 				} else {
-						$this->console->e('  '.$text);
+						$this->console->e('  →'.$text);
 				}
 			}
 		}
