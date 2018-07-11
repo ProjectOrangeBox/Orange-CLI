@@ -13,10 +13,11 @@ class Fruit_inspector {
 
 			include ROOTPATH.'/application/config/autoload.php';
 
+			/* add application folder */
 			$autoload['packages'][] = ROOTPATH.'/application';
 
 			foreach ($autoload['packages'] as $path) {
-				$this->current_package = $path;
+				$this->current_package = str_replace(ROOTPATH,'',$path);
 
 				$this->globr($path,'Controller.php');
 			}
@@ -30,7 +31,7 @@ class Fruit_inspector {
 			if (is_dir($folderitem)) {
 				$this->globr($folderitem,$searchPattern);
 			} elseif (substr($folderitem,-strlen($searchPattern)) == $searchPattern) {
-				$this->add($folderitem);
+				$this->controllers[$this->current_package][str_replace([ROOTPATH,$this->current_package],'',$folderitem)] = $this->add($folderitem);
 			}
 		}
 	}
@@ -42,81 +43,77 @@ class Fruit_inspector {
 			return;
 		}
 
+		$inspection = [];
+
+		$original_class_name = basename($path,'.php');
+
+		/* need to make a dummy class so names don't conflict */
 		$new_class_file = $this->make_dummy_class_file($path);
-
-		$pos = strpos($path,'/controllers/');
-		$path = substr($path,$pos + strlen('/controllers/'));
-
-		$pathinfo = pathinfo($path);
-
-		$directory = ($pathinfo['dirname'] == '.') ? '' : trim($pathinfo['dirname'],'/').'/';
-		$original_class_name = substr($pathinfo['filename'],0,-10);
+		$new_class_name = basename($new_class_file,'.php');
 
 		/* now we can reflect */
 		include $new_class_file;
+		
+		/* loaded so remove the "fake" file */
+		unlink($new_class_file);
 
-		$new_class_name = basename($new_class_file,'.php');
+		$reflect_class = new ReflectionClass($new_class_name);
 
-		$class = new ReflectionClass($new_class_name);
-
-		/* go up the tree */
-		$parent_class = $class;
+		/* go up the tree finding parents */
+		$parent_class = $reflect_class;
 		$class_parents = [];
 
 		while ($parent = $parent_class->getParentClass()) {
-			$class_parents[] = $parent->getName();
+			$inspection['controller']['parents'][] = $parent->getName();
 
 			$parent_class = $parent;
 		}
 
-		$this->controllers[$pathinfo['filename']]['controller'] = [
-			'directory'=>$directory,
-			'human_controller'=>$original_class_name,
-			'controller'=>$original_class_name.'Controller',
-			'parents'=>$class_parents,
-			'package'=>$this->current_package,
-			'human_package'=>end(explode('/',$this->current_package)),
-			'properties'=>[
-				'public'=>$class->getProperties(ReflectionProperty::IS_PUBLIC),
-				'protected'=>$class->getProperties(ReflectionProperty::IS_PROTECTED),
-				'static'=>$class->getProperties(ReflectionProperty::IS_STATIC),
-				'private'=>$class->getProperties(ReflectionProperty::IS_PRIVATE),
-			],
-		];
+		$inspection['controller']['file'] = str_replace(ROOTPATH,'',$path);
+		$inspection['controller']['controller'] = $original_class_name;
+		$inspection['controller']['short_controller'] = substr($original_class_name,0,-10);
+		$inspection['controller']['package'] = $this->current_package;
+		$inspection['controller']['url'] = substr(strtolower(substr($path,strpos($path,'/controllers') + 12)),0,-14);
 
-		$methods = $class->getMethods(ReflectionMethod::IS_PUBLIC);
+		$inspection['methods'] = $this->get_methods($reflect_class);
+		
+		return $inspection;
+	}
+
+	protected function get_methods($reflect_class) {
+		$inspection = [];
+		
+		$methods = $reflect_class->getMethods(ReflectionMethod::IS_PUBLIC);
 
 		foreach ($methods as $idx=>$ref_method) {
-			$method = $raw_method = $ref_method->name;
+			$raw_method = $ref_method->name;
 
-			if (substr($method,-6) == 'Action') {
-				$method = substr($method,0,-6);
-				$request_method = 'get';
-				$human_method = substr($raw_method,0,-6);
+			/* is it a Action */
+			if (substr($raw_method,-6) == 'Action') {
+				$pieces = preg_split('/(?=[A-Z])/',$raw_method);
 
-				foreach (['post','put','delete','patch','cli'] as $http_method) {
-					if (strtolower(substr($method,-strlen($http_method))) == $http_method) {
-						$request_method = $http_method;
-						$human_method = substr($raw_method,0,-(strlen($http_method) + 6));
-					}
-				}
+				$request_method = (count($pieces) == 3) ? strtolower($pieces[1]) : 'get';
 
-				$this->controllers[$pathinfo['filename']][$method] = [
-					'comments'=>trim($class->getMethod($raw_method)->getDocComment()),
-					'directory'=>$directory,
-					'human_controller'=>$original_class_name,
-					'human_method'=>$human_method,
+				$inspection[$raw_method] = [
+					'comments'=>trim($reflect_class->getMethod($raw_method)->getDocComment()),
 					'request_method'=>$request_method,
 					'method'=>$raw_method,
-					'controller'=>$original_class_name.'Controller',
-					'package'=>$this->current_package,
-					'human_package'=>end(explode('/',$this->current_package)),
-					'properties'=>$class->getMethod($raw_method)->getParameters($raw_method),
+					'action'=>$pieces[0],
 				];
 			}
 		}
+		
+		return $inspection;
+	}
 
-		unlink($new_class_file);
+	protected function get_properties($prop) {
+		$p = [];
+		
+		foreach ((array)$prop as $pp) {
+			$p[$pp['name']] = $pp['name'];
+		}
+	
+		return $p;
 	}
 
 	protected function make_dummy_class_file($real_path) {

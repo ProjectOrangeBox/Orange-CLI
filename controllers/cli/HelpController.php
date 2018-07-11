@@ -18,6 +18,7 @@ class HelpController extends MY_Controller {
 					$d = trim($extras['directory'],'/');
 					$c = trim($extras['human_controller'],'/');
 					$m = trim($extras['human_method'],'/');
+					$m = ($m == 'index') ? '' : $m;
 
 					$console->e('<light_cyan>'.str_replace('/','/',trim(strtolower($d.'/'.$c.'/'.$m),'/')).'</off>');
 

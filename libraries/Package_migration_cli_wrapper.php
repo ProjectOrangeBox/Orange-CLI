@@ -44,9 +44,7 @@ class Package_migration_cli_wrapper {
 	public function set_path($folder='') {
 		ci('package_migration')->set_path($folder);
 
-		$text = (empty($folder)) ? config('migration.migration_path') : $folder;
-
-		$this->console->heading('Path switched to '.strip_rp($text));
+		$this->console->heading('Path switched to '.str_replace(ROOTPATH,'',$folder));
 	
 		return $this;
 	}
@@ -55,7 +53,7 @@ class Package_migration_cli_wrapper {
 		$filename = ci('package_migration')->create($description);
 		
 		if ($filename) {
-			$this->console->success(strip_rp($filename).' created.');
+			$this->console->success(str_replace(ROOTPATH,'',$filename).' created.');
 		}
 	}
 	

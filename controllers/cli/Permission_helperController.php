@@ -3,36 +3,38 @@
 class Permission_helperController extends MY_Controller {
 
 	/**
-		Show all of the available Command Line Functions
+		Generate the Migration PHP for adding all found permissions
 	*/
 	public function indexCliAction() {
 		$inspection = (new Fruit_inspector)->get_controllers_methods();
 
 		$previous_group = '';
+		$html = '';
 
-		foreach ($inspection as $controller) {
-			foreach ($controller as $method=>$details) {
-				$directory = $details['directory'];
-				$class = $details['human_controller'];
-				$method = $details['human_method'];
-				$request_method = $details['request_method'];
-				$group = filter('human',$details['human_package']);
-				$key = 'url::/'.strtolower($directory.$class.'::'.$method.'~'.$request_method);
-				$description = filter('human',$directory.' '.$request_method.' '.$class.' '.$method);
+		foreach ($inspection as $package) {
+			foreach ($package as $controller=>$details) {
+				$controller = $details['controller'];
 
-				if ($group != $previous_group) {
-					echo '/* '.$group.' */'.chr(10);
-					
-					$previous_group = $group;
+				foreach ($details['methods'] as $method) {
+					if ($method['request_method'] != 'cli') {
+						$group = filter('human',$controller['url']);
+
+						if ($group != $previous_group) {
+							$html .= chr(10).'/* '.$group.' */'.chr(10);
+
+							$previous_group = $group;
+						}
+
+						$key = 'url::'.$controller['url'].'::'.$method['action'].'~'.$method['request_method'];
+						$group = filter('human',$controller['url']);
+						$description = filter('human',$controller['url'].' '.$method['action'].' '.$method['request_method']);
+
+						$html .= "ci('o_permission_model')->migration_add('".$key."','".$group."','".$description."',__CLASS__);".chr(10);
+					} /* end if */
 				}
-				
-				if ($request_method != 'cli') {
-					echo "ci('o_permission_model')->add('".$key."','".$group."','".$description."');".chr(10);
-				}
-			}
-			
-			echo chr(10);
-		}
+			} /* end $package */
+		} /* end inspection */
 
-	}
-}
+		echo trim($html).chr(10);
+	} /* end indexCliAction */
+} /* end controller */

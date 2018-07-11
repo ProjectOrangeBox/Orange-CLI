@@ -83,7 +83,7 @@ class Package_migration {
 	 *
 	 * @var string
 	 */
-	protected $_migration_regex = '/^\d{3}_(\w+)$/';
+	protected $_migration_regex = '/^\d+_(\w+)$/';
 
 	/**
 	 * Error message
@@ -133,11 +133,18 @@ class Package_migration {
 
 			$this->dbforge->create_table($this->_migration_table, TRUE);
 		}
-		
+
 		if (count($this->db->list_fields($this->_migration_table)) == 1) {
 			show_error('Your migration table "'.$this->_migration_table.'" is not package compatible. Please delete "'.$this->_migration_table.'" and let the Package_migration class create it. Then only use the package migration class since it can handle multiple packages.');
 		}
+
+	}
+
+	public function get_package($file) {
+		$package = $directory_folders[count($directory_folders)-4];
+		$package = (!empty($package)) ? '_'.$package : '';
 		
+		return $package;
 	}
 
 	/**
@@ -204,14 +211,14 @@ class Package_migration {
 			// Check for sequence gaps
 			if (isset($previous) && abs($number - $previous) > 1) 	{
 				$this->_error_string = sprintf($this->lang->line('migration_sequence_gap'), $number);
-				
+
 				return FALSE;
 			}
 
 			$previous = $number;
 
 			include_once $file;
-			
+
 			/* full filename used so we don't run into other migration classes that have the same name but a different version */
 			$class = 'Migration_'.ucfirst(strtolower(basename($file,'.php')));
 
@@ -234,21 +241,21 @@ class Package_migration {
 			log_message('debug', 'Migrating '.$method.' from version '.$current_version.' to version '.$number);
 
 			$migration[0] = new $migration[0]();
-			
+
 			$success = call_user_func($migration); /* migrations must return true to continue */
 
 			if (!$success) {
 				$error_string = $migration[0]->error_string();
-			
+
 				$this->_error_string = trim('Error Migrating '.$method.' from version '.$current_version.' to version '.$number.chr(10).$error_string);
 
 				log_message('debug', $this->_error_string);
-				
+
 				return FALSE;
 			}
-			
+
 			$current_version = $number;
-			
+
 			$this->_update_version($current_version);
 		}
 
@@ -256,7 +263,7 @@ class Package_migration {
 		// will be the down() method for the next migration up from the target
 		if ($current_version <> $target_version) {
 			$current_version = $target_version;
-			
+
 			$this->_update_version($current_version);
 		}
 
@@ -367,7 +374,9 @@ class Package_migration {
 	public function create($description) {
 		$name = ($description) ? filter('filename',$description) : 'migration';
 		$stamp = (config('migration.migration_type') == 'timestamp') ? date('YmdHis') : $this->get_next_sequential($this->_migration_path);
+		
 		$file = $this->_migration_path.$stamp.'_'.$name.'.php';
+
 		$template = file_get_contents(__DIR__.'/Migration_template.tmpl');
 		$php = ci('parser')->parse_string($template,['name'=>basename($file,'.php')],true);
 
@@ -378,14 +387,14 @@ class Package_migration {
 		@unlink($file);
 
 		$written = (file_put_contents($file,$php)) ? $file : false;
-		
+
 		if ($written) {
 			chmod($file,0777);
 		}
-		
+
 		return $written;
 	}
-	
+
 	/**
 	 * Stores the current schema version
 	 *

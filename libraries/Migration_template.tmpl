@@ -6,33 +6,18 @@ class Migration_{name} extends Migration_base {
 
 	/* example up function */
 	public function up() {
-		$this->dbforge->add_field([
-			'blog_id' => [
-				'type' => 'INT',
-				'constraint' => 5,
-				'unsigned' => TRUE,
-				'auto_increment' => TRUE
-			],
-			'blog_title' => [
-				'type' => 'VARCHAR',
-				'constraint' => '100',
-			],
-			'blog_description' => [
-				'type' => 'TEXT',
-				'null' => TRUE,
-			],
-		]);
+		$hash = $this->get_hash();
 
-		$this->dbforge->add_key('blog_id', TRUE);
-
-		$this->dbforge->create_table('blog');
+		echo $hash.' up'.chr(10);
 		
 		return true;
 	}
 
 	/* example down function */
 	public function down() {
-		$this->dbforge->drop_table('blog');
+		$hash = $this->get_hash();
+
+		echo $hash.' down'.chr(10);
 		
 		return true;
 	}

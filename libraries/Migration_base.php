@@ -4,6 +4,7 @@ class Migration_base {
 	protected $dbforge;
 	protected $_error_string = '';
 	protected $console;
+	protected $hash = null;
 
 	public function __construct() {
 		/* we will probbly need this */
@@ -36,6 +37,16 @@ class Migration_base {
 		return true;
 	}
 
+	protected function get_hash() {
+		$children = debug_backtrace(null,3);
+
+		$file = $children[0]['file'];
+
+		$this->hash = substr(str_replace([ROOTPATH.'/','/support/migrations'],'',$file),0,-4);
+		
+		return $this->hash;
+	}
+
 	protected function e($output) {
 		if (is_cli()) {
 			echo $output.chr(10);
@@ -44,8 +55,8 @@ class Migration_base {
 
 	protected function _get_package() {
 		$child = debug_backtrace(null,3);
-		
-		return strip_rp(dirname(dirname(dirname($child[1]['file']))));
+
+		return str_replace(ROOTPATH,'',dirname(dirname(dirname($child[1]['file']))));
 	}
 
 	protected function _copy_config($filename) {
@@ -109,18 +120,18 @@ class Migration_base {
 
 		return unlink($public_folder);
 	}
-	
+
 	/* these are only added to the var folder */
 	protected function _add_rw_folder($path) {
 		$var_folder = dirname(path('{rootpath}{uploads}'));
 
-		return (is_writable($var_folder)) ? mkdir($var_folder.'/'.rtrim($path,'/'),0777,true) : false;
+		return (is_writable($var_folder)) ? @mkdir($var_folder.'/'.rtrim($path,'/'),0777,true) : false;
 	}
 
 	/* these are only removed from the var folder */
 	protected function _remove_rw_folder($path) {
 		$var_folder = dirname(path('{rootpath}{uploads}'));
-	
+
 		return $this->_rmdirr($var_folder.'/'.rtrim($path,'/'));
 	}
 
@@ -169,7 +180,7 @@ class Migration_base {
 		return (is_array($columns)) ? in_array($column,$columns) : false;
 	}
 
-	protected function _find_n_replace($file_path, $find, $replace) {
+	protected function _find_n_replace($file_path, $find, $replace, $return=false) {
 		$success = false;
 
 		if (file_exists($file_path)) {
@@ -177,7 +188,7 @@ class Migration_base {
 
 			$contents = str_replace($find, $replace, $contents);
 
-			$success = file_put_contents($file_path, $contents);
+			$success = (!$return) ? file_put_contents($file_path, $contents) : $contents;
 		}
 
 		return $success;
@@ -187,8 +198,8 @@ class Migration_base {
 	protected function _relative_symlink($target,$link) {
 		/* remove the link that might be there */
 
-		$link = strip_rp($link);
-		$target = strip_rp($target);
+		$link = str_replace(ROOTPATH,'',$link);
+		$target = str_replace(ROOTPATH,'',$target);
 
 		/* remove it if it's already there */
 		@unlink(ROOTPATH.$link);

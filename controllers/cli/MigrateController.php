@@ -60,11 +60,19 @@ class MigrateController extends MY_Controller {
 	*/
 	public function findCliAction() {
 		require APPPATH.'/config/autoload.php';
+		
+		$packages = $autoload['packages'];
+		
+		foreach ($packages as $key=>$val) {
+			$packages[$key] = $val.'/support/migrations/';
+		}
 
-		ci('package_migration_cli_wrapper')->set_path()->find();
-
-		foreach ($autoload['packages'] as $package) {
-			ci('package_migration_cli_wrapper')->set_path($package.'/support/migrations/')->find($package);
+		/* add application root */
+		array_unshift($packages,config('migration.migration_path'));
+		
+		/* look in each folder */
+		foreach ($packages as $package) {
+			ci('package_migration_cli_wrapper')->set_path($package)->find($package);
 		}
 	}
 
