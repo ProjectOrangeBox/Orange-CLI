@@ -29,7 +29,7 @@ class Nav_helperController extends MY_Controller {
 
 						$url = str_replace('_','-','/'.strtolower(trim($controller['url'].'/'.$action,'/')));
 					
-						$html .= "ci('o_nav_model')->migration_add('".$url."','".$group."',__CLASS__);".chr(10);
+						$html .= "ci('o_nav_model')->migration_add('".$url."','".$group."',\$hash);".chr(10);
 					}
 				}
 			}

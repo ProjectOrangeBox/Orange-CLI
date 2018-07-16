@@ -29,7 +29,7 @@ class Permission_helperController extends MY_Controller {
 						$group = filter('human',$controller['url']);
 						$description = filter('human',$controller['url'].' '.$method['action'].' '.$method['request_method']);
 
-						$html .= "ci('o_permission_model')->migration_add('".$key."','".$group."','".$description."',__CLASS__);".chr(10);
+						$html .= "ci('o_permission_model')->migration_add('".$key."','".$group."','".$description."',\$hash);".chr(10);
 					} /* end if */
 				}
 			} /* end $package */
