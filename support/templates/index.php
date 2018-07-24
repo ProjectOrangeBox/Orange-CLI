@@ -16,7 +16,7 @@
 			<thead>
 				<tr class="panel-default">
 					<th class="panel-heading {index_header_class}">{index_label}</th>
-					<th class="panel-heading text-center">Actions</th>
+					<th class="panel-heading text-center nosort">Actions</th>
 				</tr>
 			</thead>
 		<tbody>
