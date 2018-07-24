@@ -12,14 +12,14 @@
 </div>
 
 <div class="row">
-	<table class="table orange sortable table-hover">
+		<table class="table table-sticky-header table-search table-sort table-hover">
 			<thead>
 				<tr class="panel-default">
 					<th class="panel-heading {index_header_class}">{index_label}</th>
 					<th class="panel-heading text-center">Actions</th>
 				</tr>
 			</thead>
-		<tbody class="searchable">
+		<tbody>
 			<? foreach ($records as $row) { ?>
 			<tr>
 				<td class="{index_column_class}">
