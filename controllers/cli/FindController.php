@@ -3,7 +3,7 @@
 class FindController extends MY_Controller {
 
 	/**
-		Search your application for files
+		Search your application for files.
 	*/
 	public function fileCliAction($filename=null) {
 		require_once __DIR__.'/../../libraries/Console.php';
