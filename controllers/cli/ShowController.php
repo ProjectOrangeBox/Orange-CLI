@@ -6,7 +6,7 @@ class ShowController extends MY_Controller {
 		Show all available validation classes. Use optional -p to show path instead of help
 	*/
 	public function validateCliAction($arg=null) {
-		$orange_paths = orange_paths('classes');
+		$orange_paths = orange_autoload_files::paths('classes');
 
 		foreach ($orange_paths as $name=>$path) {
 			if (substr($name,0,strlen('validate_')) == 'validate_') {
@@ -19,7 +19,7 @@ class ShowController extends MY_Controller {
 		Show all available pear classes. Use optional -p to show path instead of help
 	*/
 	public function pearCliAction($arg=null) {
-		$orange_paths = orange_paths('classes');
+		$orange_paths = orange_autoload_files::paths('classes');
 
 		foreach ($orange_paths as $name=>$path) {
 			if (substr($name,0,strlen('pear_')) == 'pear_') {
@@ -32,7 +32,7 @@ class ShowController extends MY_Controller {
 		Show all available filter classes. Use optional -p to show path instead of help
 	*/
 	public function filterCliAction($arg=null) {
-		$orange_paths = orange_paths('classes');
+		$orange_paths = orange_autoload_files::paths('classes');
 
 		foreach ($orange_paths as $name=>$path) {
 			if (substr($name,0,strlen('filter_')) == 'filter_') {
@@ -45,7 +45,7 @@ class ShowController extends MY_Controller {
 		Show all available models classes. Use optional -p to show path instead of help
 	*/
 	public function modelsCliAction($arg=null) {
-		$orange_paths = orange_paths('models');
+		$orange_paths = orange_autoload_files::paths('models');
 
 		foreach ($orange_paths as $name=>$path) {
 			$this->line($name,$path,$arg);
@@ -56,7 +56,7 @@ class ShowController extends MY_Controller {
 		Show all available libraries classes. Use optional -p to show path instead of help
 	*/
 	public function librariesCliAction($arg=null) {
-		$orange_paths = orange_paths('libraries');
+		$orange_paths = orange_autoload_files::paths('libraries');
 
 		foreach ($orange_paths as $name=>$path) {
 			$this->line($name,$path,$arg);

@@ -123,14 +123,14 @@ class Migration_base {
 
 	/* these are only added to the var folder */
 	protected function _add_rw_folder($path) {
-		$var_folder = dirname(path('{rootpath}{uploads}'));
+		$var_folder = dirname(site_url('{rootpath}{uploads}',false));
 
 		return (is_writable($var_folder)) ? @mkdir($var_folder.'/'.rtrim($path,'/'),0777,true) : false;
 	}
 
 	/* these are only removed from the var folder */
 	protected function _remove_rw_folder($path) {
-		$var_folder = dirname(path('{rootpath}{uploads}'));
+		$var_folder = dirname(path('{rootpath}{uploads}',false));
 
 		return $this->_rmdirr($var_folder.'/'.rtrim($path,'/'));
 	}
