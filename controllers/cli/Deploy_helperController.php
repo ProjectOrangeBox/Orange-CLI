@@ -10,7 +10,7 @@ class Deploy_helperController extends MY_Controller {
 		"gitx update {PWD}/packages/projectorangebox/extra-validations {GITBRANCH}"
 		*/
 
-		require APPPATH.'/config/autoload.php';
+		$autoload = load_config('autoload','autoload');
 
 		foreach ($autoload['packages'] as $package) {
 			echo '"gitx update {PWD}'.str_replace(ROOTPATH,'',$package).' {GITBRANCH}",'.chr(10);

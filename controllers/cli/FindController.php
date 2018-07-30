@@ -18,7 +18,7 @@ class FindController extends MY_Controller {
 
 		$console->info('Looking for "'.$filename.'"');
 
-		require APPPATH.'/config/autoload.php';
+		$autoload = load_config('autoload','autoload');
 
 		$autoload['packages'][] = APPPATH;
 		$autoload['packages'][] = BASEPATH;

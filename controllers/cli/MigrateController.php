@@ -59,7 +59,7 @@ class MigrateController extends MY_Controller {
 		https://www.codeigniter.com/user_guide/libraries/migration.html#CI_Migration::find_migrations
 	*/
 	public function findCliAction() {
-		require APPPATH.'/config/autoload.php';
+		$autoload = load_config('autoload','autoload');
 		
 		$packages = $autoload['packages'];
 		
