@@ -359,7 +359,7 @@ class Console {
 	public function new_line($num = 1) {
 		// Do it once or more, write with empty string gives us a new line
 		for ($i = 0; $i < $num; $i++) {
-			$this->write();
+			$this->e('');
 		}
 
 		return $this;

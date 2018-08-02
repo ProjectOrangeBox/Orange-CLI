@@ -9,7 +9,7 @@ class Permission_helperController extends MY_Controller {
 		$inspection = (new Fruit_inspector)->get_controllers_methods();
 
 		$previous_group = '';
-		$html = '';
+		$groups = [];
 
 		foreach ($inspection as $package) {
 			foreach ($package as $controller=>$details) {
@@ -19,22 +19,37 @@ class Permission_helperController extends MY_Controller {
 					if ($method['request_method'] != 'cli') {
 						$group = filter('human',$controller['url']);
 
-						if ($group != $previous_group) {
-							$html .= chr(10).'/* '.$group.' */'.chr(10);
-
-							$previous_group = $group;
-						}
-
 						$key = 'url::'.$controller['url'].'::'.$method['action'].'~'.$method['request_method'];
 						$group = filter('human',$controller['url']);
 						$description = filter('human',$controller['url'].' '.$method['action'].' '.$method['request_method']);
 
-						$html .= "ci('o_permission_model')->migration_add('".$key."','".$group."','".$description."',\$hash);".chr(10);
+						$groups[$group][] = "ci('o_permission_model')->migration_add('".$key."','".$group."','".$description."',\$hash);";
 					} /* end if */
 				}
 			} /* end $package */
 		} /* end inspection */
 
-		echo trim($html).chr(10);
+		ksort($groups);
+
+		foreach ($groups as $group=>$record) {
+			ci('console')->e('<cyan>'.(++$idx).'</off> '.$group);
+		}
+
+		$idx = 0;
+
+		$number = ci('console')->prompt('Select the Controller you are interested in');
+		ci('console')->new_line();
+
+		foreach ($groups as $group=>$records) {
+			++$idx;
+			
+			if ($idx == $number) {
+				ci('console')->e('/* '.$group.' */');
+				foreach ($records as $r) {
+					ci('console')->e($r);
+				}
+			}
+		}
+
 	} /* end indexCliAction */
 } /* end controller */
