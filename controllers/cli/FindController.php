@@ -6,11 +6,9 @@ class FindController extends MY_Controller {
 		Search your application for files.
 	*/
 	public function fileCliAction($filename=null) {
-		require_once __DIR__.'/../../libraries/Console.php';
+		$console = new League\CLImate\CLImate;
 
-		$console = new Console;
-
-		//$filename = end(explode('/',$_SERVER['argv'][2]));
+		$filename = end(explode('/',$_SERVER['argv'][2]));
 
 		if (empty($filename)) {
 			$console->error('Please provide a filename to search for.');
@@ -35,9 +33,9 @@ class FindController extends MY_Controller {
 						if (preg_match_all($re, $file->getFilename(), $matches, PREG_SET_ORDER, 0)) {
 							$parts = pathinfo(str_replace(ROOTPATH,'',$name));
 
-							$styled = str_ireplace($matches[0][0],'<cyan>'.$matches[0][0].'</off>',$parts['basename']);
+							$styled = str_ireplace($matches[0][0],'<cyan>'.$matches[0][0].'</cyan>',$parts['basename']);
 							
-							$console->e($parts['dirname'].'/'.$styled);
+							$console->out($parts['dirname'].'/'.$styled);
 						}
 					}
 				}

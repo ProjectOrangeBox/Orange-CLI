@@ -12,10 +12,6 @@ class Migration_base {
 
 		/* and this */
 		$this->dbforge = &ci()->dbforge;
-
-		require_once __DIR__.'/Console.php';
-
-		$this->console = new console;
 	}
 
 	/**

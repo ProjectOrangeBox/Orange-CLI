@@ -7,9 +7,7 @@ class CreateController extends MY_Controller {
 		Generate a generic package
 	*/
 	public function packageCliAction($package=null) {
-		require_once __DIR__.'/../../libraries/Console.php';
-
-		$console = new Console;
+		$console = new League\CLImate\CLImate;
 
 		if (empty($package)) {
 			$console->error('Please provide a package name');

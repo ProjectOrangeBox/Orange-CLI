@@ -2,6 +2,12 @@
 
 class ShowController extends MY_Controller {
 
+	public function __construct() {
+		parent::__construct();
+		
+		$this->console = new League\CLImate\CLImate;
+	}
+
 	/**
 		Show all available validation classes. Use optional -p to show path instead of help
 	*/

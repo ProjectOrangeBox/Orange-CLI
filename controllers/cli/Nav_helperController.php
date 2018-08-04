@@ -6,6 +6,7 @@ class Nav_helperController extends MY_Controller {
 		Generate the Migration PHP for adding all found get http requests
 	*/
 	public function indexCliAction() {
+		$console = new League\CLImate\CLImate;
 		$inspection = (new Fruit_inspector)->get_controllers_methods();
 
 		$previous_group = '';
@@ -20,7 +21,7 @@ class Nav_helperController extends MY_Controller {
 						$action = ($method['action'] == 'index') ? '' : $method['action'];
 						$url = str_replace('_','-','/'.strtolower(trim($controller['url'].'/'.$action,'/')));
 					
-						$groups[filter('human',$controller['url'])][] = "ci('o_nav_model')->migration_add('".$url."','".$group."',\$hash);";
+						$groups[$controller['url']][] = "ci('o_nav_model')->migration_add('".$url."','".$group."',\$hash);";
 					}
 				}
 			}
@@ -28,30 +29,18 @@ class Nav_helperController extends MY_Controller {
 		
 		ksort($groups);
 
-		foreach ($groups as $group=>$record) {
-			ci('console')->e('<cyan>'.(++$idx).'</off> '.$group);
-		}
+		$input = $console->checkboxes('Select the Controllers you are interested in:',array_keys($groups));
+		$response = $input->prompt();
 
-		$idx = 0;
+		$console->border();
 
-		$number = ci('console')->prompt('Select the Controller you are interested in');
-
-		ci('console')->new_line();
-		ci('console')->info('The controller has the following Get HTTP Request Methods');
-		ci('console')->new_line();
-
-		foreach ($groups as $group=>$records) {
-			++$idx;
-			
-			if ($idx == $number) {
-				ci('console')->e('/* '.$group.' */');
-				foreach ($records as $r) {
-					ci('console')->e($r);
-				}
+		foreach ($groups as $key=>$val) {
+			if (in_array($key,$response)) {
+				$console->out($val);
 			}
 		}
 
-		ci('console')->new_line();
+		$console->border();
+	} /* end indexCliAction */
 
-	}
-}
+} /* end controller */

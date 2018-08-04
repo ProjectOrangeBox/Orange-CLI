@@ -27,7 +27,6 @@ class Fruit_inspector {
 	}
 
 	public function inspect($path,$name='class') {
-
 		$inspection = [];
 
 		$original_class_name = basename($path,'.php');
@@ -65,7 +64,7 @@ class Fruit_inspector {
 			
 			$filter_methods = ($name == 'controller') ? 'Action' : '';
 			
-			$inspection['methods'] = $this->get_methods($reflect_class,$filter_methods);
+			$inspection['methods'] = $this->get_methods($reflect_class,$filter_methods,$original_class_name);
 		}
 
 		return $inspection;
@@ -91,7 +90,7 @@ class Fruit_inspector {
 		return $this->inspect($path,$name);
 	}
 
-	protected function get_methods($reflect_class,$filter_methods) {
+	protected function get_methods($reflect_class,$filter_methods,$original_class_name) {
 		$inspection = [];
 
 		$methods = $reflect_class->getMethods(ReflectionMethod::IS_PUBLIC);
@@ -112,11 +111,16 @@ class Fruit_inspector {
 
 				$request_method = (count($pieces) == 3) ? strtolower($pieces[1]) : 'get';
 
+				$method_parent = $ref_method->getDeclaringClass();
+				
+				$method_parent = (substr($method_parent->name,0,5) == 'Fake_') ? $original_class_name : $method_parent->name;
+
 				$inspection[$raw_method] = [
 					'comments'=>trim($reflect_class->getMethod($raw_method)->getDocComment()),
 					'request_method'=>$request_method,
 					'method'=>$raw_method,
 					'action'=>$pieces[0],
+					'parent'=>$method_parent,
 				];
 			}
 		}

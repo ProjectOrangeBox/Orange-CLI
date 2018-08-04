@@ -6,6 +6,8 @@ class Deploy_helperController extends MY_Controller {
 		Generate the Deploy JSON for adding all found GIT Repositories
 	*/
 	public function indexCliAction() {
+		$console = new League\CLImate\CLImate;
+
 		$autoload = load_config('autoload','autoload');
 		$packages = $autoload['packages'];
 
@@ -19,7 +21,19 @@ class Deploy_helperController extends MY_Controller {
 			$migrations[] = '"cd {PWD}/public;php index.php cli/migrate/up'.str_replace(ROOTPATH,' ',$package).'"';
 		}
 
-		echo implode(','.PHP_EOL,$git_update).PHP_EOL.PHP_EOL.implode(','.PHP_EOL,$migrations).PHP_EOL;
+		$climate->border();
+
+		foreach ($git_update as $line) {
+			$console->out($line);
+		}
+
+		$climate->border();
+		
+		foreach ($migrations as $line) {
+			$console->out($line);
+		}
+
+		$climate->border();
 
 	}
 }

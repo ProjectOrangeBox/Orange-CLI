@@ -6,6 +6,7 @@ class Permission_helperController extends MY_Controller {
 		Generate the Migration PHP for adding all found permissions
 	*/
 	public function indexCliAction() {
+		$console = new League\CLImate\CLImate;
 		$inspection = (new Fruit_inspector)->get_controllers_methods();
 
 		$previous_group = '';
@@ -23,7 +24,7 @@ class Permission_helperController extends MY_Controller {
 						$group = filter('human',$controller['url']);
 						$description = filter('human',$controller['url'].' '.$method['action'].' '.$method['request_method']);
 
-						$groups[$group][] = "ci('o_permission_model')->migration_add('".$key."','".$group."','".$description."',\$hash);";
+						$groups[$controller['url']][] = "ci('o_permission_model')->migration_add('".$key."','".$group."','".$description."',\$hash);";
 					} /* end if */
 				}
 			} /* end $package */
@@ -31,25 +32,18 @@ class Permission_helperController extends MY_Controller {
 
 		ksort($groups);
 
-		foreach ($groups as $group=>$record) {
-			ci('console')->e('<cyan>'.(++$idx).'</off> '.$group);
-		}
+		$input = $console->checkboxes('Select the Controllers you are interested in:',array_keys($groups));
+		$response = $input->prompt();
 
-		$idx = 0;
+		$console->border();
 
-		$number = ci('console')->prompt('Select the Controller you are interested in');
-		ci('console')->new_line();
-
-		foreach ($groups as $group=>$records) {
-			++$idx;
-			
-			if ($idx == $number) {
-				ci('console')->e('/* '.$group.' */');
-				foreach ($records as $r) {
-					ci('console')->e($r);
-				}
+		foreach ($groups as $key=>$val) {
+			if (in_array($key,$response)) {
+				$console->out($val);
 			}
 		}
 
+		$console->border();
 	} /* end indexCliAction */
+
 } /* end controller */

@@ -6,9 +6,7 @@ class Package_migration_cli_wrapper {
 	/* https://www.codeigniter.com/user_guide/libraries/migration.html */
 
 	public function __construct() {
-		require_once __DIR__.'/Console.php';
-
-		$this->console = new console;
+		$this->console = new League\CLImate\CLImate;
 	}
 
 	public function latest() {
@@ -33,9 +31,9 @@ class Package_migration_cli_wrapper {
 				$text = substr_replace(basename($value),' ',3,1);
 
 				if ((int)$num <= $highest) {
-						$this->console->success('   '.$text);
+					$this->console->tab()->dim()->out('√ '.$text);
 				} else {
-						$this->console->e('  →'.$text);
+					$this->console->tab()->info('> '.$text);
 				}
 			}
 		}
@@ -43,8 +41,10 @@ class Package_migration_cli_wrapper {
 
 	public function set_path($folder='') {
 		ci('package_migration')->set_path($folder);
-
-		$this->console->heading('Path switched to '.str_replace(ROOTPATH,'',$folder));
+		
+		$this->console->border();
+		
+		$this->console->out('Path switched to '.str_replace(ROOTPATH,'',$folder));
 	
 		return $this;
 	}
