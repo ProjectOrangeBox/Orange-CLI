@@ -1,15 +1,14 @@
 <?php
 
-class {upackage}_model extends Database_model {
-	protected $table = '{table}';
-	protected $primary_key = '{model_primary_key}';
-	protected $auto_generated_primary = {model_auto_generated_primary};
-	protected $has_soft_delete = {model_has_soft_delete};
+class {ucontroller_name}_model extends Database_model {
+	protected $table = '{tablename}'; /* required */
+	protected $primary_key = 'id'; /* parent default id */
+	protected $auto_generated_primary = true; /* parent default true */
+	protected $has_soft_delete = false; /* parent default false */
 	protected $rules = [
-		{rules}
 	];
 	protected $rule_sets = [
-		'insert'=>'{model_insert_columns}',
+		'insert'=>'{required columns}', /* required */
 	];
 
-} /* end class {upackage}_model */
+} /* end class {ucontroller_name}_model */
