@@ -39,7 +39,7 @@ class Migration_base {
 		$file = $children[0]['file'];
 
 		$this->hash = substr(str_replace([ROOTPATH.'/','/support/migrations'],'',$file),0,-4);
-		
+
 		return $this->hash;
 	}
 
@@ -156,6 +156,53 @@ class Migration_base {
 
 		/* finally the folder */
 		return rmdir($directory);
+	}
+
+	protected function _add_route($text,$before_text) {
+		$text = rtrim($text);
+		$route_file = APPPATH.'config/routes.php';
+
+		if (!is_writable($route_file)) {
+			show_error('Route file "'.$route_file.'" can not be read and written to please chmod it before continuing.');
+		}
+
+		$matched = false;
+		$new_contents = '';
+		$lines = explode(PHP_EOL,file_get_contents($route_file));
+
+		foreach ($lines as $line) {
+			if (strpos($line,$before_text) !== false && !$matched) {
+				$new_contents .= $text.PHP_EOL;
+				$matched = true;
+			}
+
+			$new_contents .= $line.PHP_EOL;
+		}
+
+		if (!$matched) {
+			show_error('Route before text "'.$before_text.'" not found in "'.$route_file.'"');
+		}
+
+		return file_put_contents($route_file,trim($new_contents).PHP_EOL);
+	}
+
+	protected function _remove_route($text) {
+		$text = rtrim($text);
+		$route_file = APPPATH.'config/routes.php';
+
+		if (!is_writable($route_file)) {
+			show_error('Route file "'.$route_file.'" can not be read and written to please chmod it before continuing.');
+		}
+
+		$content = file_get_contents($route_file);
+
+		if (strpos($content,$text) === false) {
+			show_error('Route text not found in "'.$route_file.'"');
+		}
+
+		$content = str_replace($text.PHP_EOL,'',$content);
+
+		return file_put_contents($route_file,trim($content).PHP_EOL);
 	}
 
 	protected function _describe_table($tablename, $database_config = 'default') {
