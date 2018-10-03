@@ -186,7 +186,7 @@ class Migration_base {
 		return file_put_contents($route_file,trim($new_contents).PHP_EOL);
 	}
 
-	protected function _remove_route($text) {
+	protected function _remove_route($text,$quiet=false) {
 		$text = rtrim($text);
 		$route_file = APPPATH.'config/routes.php';
 
@@ -196,8 +196,10 @@ class Migration_base {
 
 		$content = file_get_contents($route_file);
 
-		if (strpos($content,$text) === false) {
-			show_error('Route text not found in "'.$route_file.'"');
+		if (!$quiet) {
+			if (strpos($content,$text) === false) {
+				show_error('Route text not found in "'.$route_file.'"');
+			}
 		}
 
 		$content = str_replace($text.PHP_EOL,'',$content);
