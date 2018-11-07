@@ -21,19 +21,15 @@ class Deploy_helperController extends MY_Controller {
 			$migrations[] = '"cd {PWD}/public;php index.php cli/migrate/up'.str_replace(ROOTPATH,' ',$package).'"';
 		}
 
-		$climate->border();
+		$console->border();
 
-		foreach ($git_update as $line) {
-			$console->out($line);
-		}
+		$console->out(implode(','.PHP_EOL,$git_update));
 
-		$climate->border();
+		$console->border();
 		
-		foreach ($migrations as $line) {
-			$console->out($line);
-		}
+		$console->out(implode(','.PHP_EOL,$migrations));
 
-		$climate->border();
+		$console->border();
 
 	}
 }
