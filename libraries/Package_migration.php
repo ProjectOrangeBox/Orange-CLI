@@ -98,7 +98,8 @@ class Package_migration {
 	 * @param	array	$config
 	 * @return	void
 	 */
-	public function __construct() {
+	public function __construct()
+	{
 		log_message('info', 'Migrations Class Initialized');
 
 		// Are they trying to use migrations while it is disabled?
@@ -140,13 +141,6 @@ class Package_migration {
 
 	}
 
-	public function get_package($file) {
-		$package = $directory_folders[count($directory_folders)-4];
-		$package = (!empty($package)) ? '_'.$package : '';
-		
-		return $package;
-	}
-
 	/**
 	 * Migrate to a schema version
 	 *
@@ -156,7 +150,8 @@ class Package_migration {
 	 * @param	string	$target_version	Target schema version
 	 * @return	mixed	TRUE if no migrations are found, current version string on success, FALSE on failure
 	 */
-	public function version($target_version) {
+	public function version($target_version)
+	{
 		// Note: We use strings, so that timestamp versions work on 32-bit systems
 		$current_version = $this->get_version();
 
@@ -277,7 +272,8 @@ class Package_migration {
 	 *
 	 * @return	mixed	Current version string on success, FALSE on failure
 	 */
-	public function latest() {
+	public function latest()
+	{
 		$migrations = $this->find_migrations();
 
 		if (empty($migrations)) {
@@ -298,8 +294,11 @@ class Package_migration {
 	 *
 	 * @return	mixed	TRUE if no migrations are found, current version string on success, FALSE on failure
 	 */
-	public function current() {
-		return $this->version($this->_migration_version);
+	public function current($version=null)
+	{
+		$version = ($version) ?? $this->_migration_version;
+
+		return $this->version($version);
 	}
 
 	/**
@@ -307,7 +306,8 @@ class Package_migration {
 	 *
 	 * @return	string	Error message returned as a string
 	 */
-	public function error_string() {
+	public function error_string()
+	{
 		return $this->_error_string;
 	}
 
@@ -316,7 +316,8 @@ class Package_migration {
 	 *
 	 * @return	array	list of migration file paths sorted by version
 	 */
-	public function find_migrations() 	{
+	public function find_migrations() 
+	{
 		$migrations = [];
 
 		// Load all *_*.php files in the migrations path
@@ -349,7 +350,8 @@ class Package_migration {
 	 * @param	string	$migration
 	 * @return	string	Numeric portion of a migration filename
 	 */
-	protected function _get_migration_number($migration) {
+	protected function _get_migration_number($migration)
+	{
 		return sscanf($migration, '%[0-9]+', $number) ? $number : '0';
 	}
 
@@ -358,23 +360,25 @@ class Package_migration {
 	 *
 	 * @return	string	Current migration version
 	 */
-	public function get_version() {
+	public function get_version()
+	{
 		$row = $this->db->select('version')->where(['package'=>$this->prep_package($this->_migration_path)])->get($this->_migration_table)->row();
 
 		return $row ? $row->version : '0';
 	}
 
-
-	public function set_path($path = null) {
+	public function set_path($path = null)
+	{
 		$this->_migration_path = ($path) ? rtrim($path,'/').'/' : rtrim(config('migration.migration_path'),'/');
 
 		return $this;
 	}
 
-	public function create($description) {
+	public function create($description)
+	{
 		$name = ($description) ? filter('filename',$description) : 'migration';
 		$stamp = (config('migration.migration_type') == 'timestamp') ? date('YmdHis') : $this->get_next_sequential($this->_migration_path);
-		
+
 		$file = $this->_migration_path.$stamp.'_'.$name.'.php';
 
 		$template = file_get_contents(__DIR__.'/Migration_template.tmpl');
@@ -401,17 +405,20 @@ class Package_migration {
 	 * @param	string	$migration	Migration reached
 	 * @return	void
 	 */
-	protected function _update_version($migration) {
+	protected function _update_version($migration)
+	{
 		$this->db->replace($this->_migration_table,['package'=>$this->prep_package($this->_migration_path),'version'=>$migration]);
 	}
 
-	protected function prep_package($path) {
+	protected function prep_package($path)
+	{
 		$prep = str_replace([ROOTPATH,'/support/migrations/'],'',$path);
 
 		return (empty($prep) ? '/application' : $prep);
 	}
 
-	protected function get_next_sequential($folder) {
+	protected function get_next_sequential($folder)
+	{
 		list($highest) = explode('_',basename(end(glob($folder.'*_*.php'))),1);
 
 		return substr('000'.((int)$highest+1),-3);
@@ -423,7 +430,8 @@ class Package_migration {
 	 * @param	string	$var
 	 * @return	mixed
 	 */
-	public function __get($var) {
+	public function __get($var)
+	{
 		return get_instance()->$var;
 	}
 

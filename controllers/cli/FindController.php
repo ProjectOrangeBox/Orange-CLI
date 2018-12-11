@@ -8,11 +8,12 @@ class FindController extends MY_Controller {
 	public function fileCliAction($filename=null) {
 		$console = new League\CLImate\CLImate;
 
-		$filename = end(explode('/',$_SERVER['argv'][2]));
-
-		if (empty($filename)) {
+		if (!isset($_SERVER['argv'][2])) {
 			$console->error('Please provide a filename to search for.');
+			exit(1);
 		}
+
+		$filename = $_SERVER['argv'][2];
 
 		$console->info('Looking for "'.$filename.'"');
 
