@@ -1,109 +1,176 @@
 <?php
 
 class ShowController extends MY_Controller {
+	protected $console;
+	protected $padding;
+	protected $results = [];
+	protected $files = [];
 
-	public function __construct() {
+	protected $path = false;
+	protected $details = false;
+	protected $tag = 'show';
+
+	public function __construct()
+	{
 		parent::__construct();
 
 		$this->console = new League\CLImate\CLImate;
+		$this->padding = $this->console->padding(40)->char(' ');
+	}
+
+	public function packagesCliAction($arg=null)
+	{
+		$autoload = load_config('autoload','autoload');
+
+		$orange_paths = explode(PATH_SEPARATOR,rtrim(APPPATH,'/').PATH_SEPARATOR.implode(PATH_SEPARATOR,$autoload['packages']));
+
+		foreach ($orange_paths as $path) {
+			$this->console->out($path);
+		}
+
 	}
 
 	/**
 		Show all available validation classes. Use optional -p to show path instead of help
-	*/
-	public function validateCliAction($arg=null) {
-		$orange_paths = orange_locator::classes();
-
-		foreach ($orange_paths as $name=>$path) {
-			if (substr($name,0,strlen('validate_')) == 'validate_') {
-				$this->line($name,$path,$arg);
-			}
-		}
+	 */
+	public function validateCliAction($arg=null)
+	{
+		$this->options($arg)->loop_over('(.*)/libraries/validations/Validate_(.*).php');
 	}
 
 	/**
 		Show all available pear classes. Use optional -p to show path instead of help
-	*/
-	public function pearCliAction($arg=null) {
-		$orange_paths = orange_locator::classes();
-
-		foreach ($orange_paths as $name=>$path) {
-			if (substr($name,0,strlen('pear_')) == 'pear_') {
-				$this->line($name,$path,$arg);
-			}
-		}
+	 */
+	public function pearCliAction($arg=null)
+	{
+		$this->options($arg)->loop_over('(.*)/libraries/pear_plugins/Pear_(.*).php');
 	}
 
 	/**
 		Show all available filter classes. Use optional -p to show path instead of help
-	*/
-	public function filterCliAction($arg=null) {
-		$orange_paths = orange_locator::classes();
-
-		foreach ($orange_paths as $name=>$path) {
-			if (substr($name,0,strlen('filter_')) == 'filter_') {
-				$this->line($name,$path,$arg);
-			}
-		}
+	 */
+	public function filterCliAction($arg=null)
+	{
+		$this->options($arg)->loop_over('(.*)/libraries/filters/Filter_(.*).php');
 	}
 
 	/**
 		Show all available models classes. Use optional -p to show path instead of help
-	*/
-	public function modelsCliAction($arg=null) {
-		$orange_paths = orange_locator::classes();
-
-		foreach ($orange_paths as $name=>$path) {
-			$this->line($name,$path,$arg);
-		}
+	 */
+	public function modelsCliAction($arg=null)
+	{
+		$this->options($arg)->loop_over('(.*)/models/(.*)_model.php');
 	}
 
 	/**
 		Show all available libraries classes. Use optional -p to show path instead of help
-	*/
-	public function librariesCliAction($arg=null) {
-		$orange_paths = orange_locator::classes();
-
-		foreach ($orange_paths as $name=>$path) {
-			$this->line($name,$path,$arg);
-		}
+	 */
+	public function controllersCliAction($arg=null)
+	{
+		$this->options($arg)->loop_over('(.*)/controllers/(.*)Controller.php');
 	}
 
-	protected function line($name,$path,$arg) {
-		$padding = 40;
-
-		echo str_pad($name,$padding);
-
-		if ($arg == '_p') {
-			/* show path */
-			echo $path.PHP_EOL;
-		} else {
-			echo $this->get_help($path,$padding);
-		}
+	public function controller_traitsCliAction($arg=null)
+	{
+		$this->options($arg)->loop_over('(.*)/controllers/traits/(.*)controller_trait.php');
 	}
 
-	protected function get_help($filepath,$padding) {
-		$content = file_get_contents($filepath);
+	public function middlewareCliAction($arg=null)
+	{
+		$this->options($arg)->loop_over('(.*)/middleware/(.*)Middleware.php');
+	}
 
-		$int = preg_match_all('/@show(.*)/m', $content, $matches, PREG_SET_ORDER, 0);
+	protected function options($arg)
+	{
+		if ($arg == '_p' || $arg == '-p') {
+			$this->path = true;
+		} elseif (is_string($arg)) {
+			$this->details = $arg;
+		}
+		
+		return $this;
+	}
 
-		$text = '';
+	protected function loop_over($regex)
+	{
+		$autoload = load_config('autoload','autoload');
 
-		if ($int) {
-			$idx = 1;
+		$orange_paths = explode(PATH_SEPARATOR,rtrim(APPPATH,'/').PATH_SEPARATOR.implode(PATH_SEPARATOR,$autoload['packages']));
+		
+		foreach ($orange_paths as $path) {
+			$this->globr($path);
+		}
 
-			foreach ($matches as $match) {
-				if ($idx == 1) {
-					$text .= trim($match[1]).PHP_EOL;
-				} else {
-					$text .= str_repeat(' ',$padding).trim($match[1]).PHP_EOL;
+		foreach ($this->files as $name=>$path) {
+			if (preg_match_all('#^'.$regex.'$#im', $path, $matches, PREG_SET_ORDER, 0)) {
+				if (is_array($matches)) {
+					$this->get_path($name,$path);
+					$this->get_help($name,$path,'@help');
+					$this->get_help_between($name,$path,'@details');
 				}
-
-				$idx++;
 			}
 		}
 
-		return trim($text).PHP_EOL;
+		foreach ($this->results as $name=>$entry) {
+			if ($this->path) {
+				$this->padding->label($name)->result($entry['path']);
+			} elseif ($this->details) {
+				if ($name == $this->details) {
+					$this->console->blue($name.' Detailed Help');
+					$this->console->out($this->results[$name]['details']);
+				}
+			} else {
+				if (count($entry['help'])) {
+					foreach ($entry['help'] as $help) {
+						$this->padding->label($name)->result($help);
+						$name = '';
+					}
+				} else {
+					$this->padding->label($name)->result('');
+				}
+			}
+		}
+	}
+
+	protected function get_path($name,$path)
+	{
+		$this->results[$name]['path'] = $path;
+	}
+
+	protected function get_help($name,$filepath,$tag)
+	{
+		$help = [];
+
+		if (preg_match_all('/'.$tag.' (.*)/m', file_get_contents($filepath), $matches, PREG_SET_ORDER, 0)) {
+			foreach ($matches as $m) {
+				$help[] = $m[1];
+			}
+		}
+
+		$this->results[$name]['help'] = $help;
+	}
+
+	protected function get_help_between($name,$filepath,$tag)
+	{
+		$details = '';
+
+		if (preg_match_all('/'.$tag.'(.*)'.$tag.'/ims',file_get_contents($filepath), $matches, PREG_SET_ORDER, 0)) {
+			$details = trim($matches[0][1]);
+		}
+
+		$this->results[$name]['details'] = $details;
+	}
+
+	protected function globr($path)
+	{
+		if (file_exists($path)) {
+			$files = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($path),RecursiveIteratorIterator::SELF_FIRST);
+			foreach ($files as $f) {
+				if ($f->getExtension() == 'php') {
+					$this->files[$f->getBasename('.php')] = $f->getRealPath();
+				}
+			}
+		}
 	}
 
 }
