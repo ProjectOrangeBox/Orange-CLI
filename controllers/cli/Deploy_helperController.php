@@ -12,7 +12,8 @@ class Deploy_helperController extends MY_Controller
 
 		$autoload = load_config('autoload','autoload');
 		$packages = $autoload['packages'];
-
+		
+		/* this adds root application folder */
 		$packages = array_merge([''],$packages);
 
 		foreach ($packages as $package) {
@@ -23,7 +24,7 @@ class Deploy_helperController extends MY_Controller
 			$migrations[] = '"cd {PWD}/public;php index.php cli/migrate/up'.str_replace(ROOTPATH,' ',$package).'"';
 
 			/* gitx checkout https://github.com/ProjectOrangeBox/Orange_v2_cli.git {PWD}/packages/projectorangebox/migrations {GITBRANCH} */
-			$checkout[] = '"gitx checkout '.$this->get_remote($package).' {PWD}'.str_replace(ROOTPATH,'',$package).' {GITBRANCH}"';
+			$checkout[] = '"gitx checkout '.$this->get_remote($package,$console).' {PWD}'.str_replace(ROOTPATH,'',$package).' {GITBRANCH}"';
 		}
 
 		$console->border();
@@ -41,9 +42,9 @@ class Deploy_helperController extends MY_Controller
 		$console->border();
 	}
 
-	protected function get_remote($package)
+	protected function get_remote($package,$console)
 	{
-		echo '.';
+		$console->out('.');
 
 		$package = (empty($package)) ? ROOTPATH : $package;
 
