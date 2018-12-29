@@ -4,7 +4,6 @@ class {ucontroller_name}_model extends Database_model {
 	protected $table = '{tablename}'; /* required */
 	protected $primary_key = 'id'; /* parent default id */
 	protected $auto_generated_primary = true; /* parent default true */
-	protected $has_soft_delete = false; /* parent default false */
 	protected $rules = [
 	];
 	protected $rule_sets = [

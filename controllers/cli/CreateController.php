@@ -6,18 +6,24 @@ class CreateController extends MY_Controller {
 
 	/**
 		Generate a generic package
+		
+		php index.php package_folder/package_name url_folder
+		
 	*/
 	public function packageCliAction() {
 		$this->console = new League\CLImate\CLImate;
+		
 		$package = (isset($_SERVER['argv'][2])) ? trim($_SERVER['argv'][2],'/') : '';
 		$folder =  (isset($_SERVER['argv'][3])) ? trim($_SERVER['argv'][3],'/') : '';
 
 		if (empty($package)) {
 			$this->console->error('Please provide a package path');
+			exit(1);
 		}
 
 		if (empty($folder)) {
 			$this->console->error('Please provide the controller url');
+			exit(1);
 		}
 
 		$this->package_folder = ROOTPATH.'/packages/'.$package;
