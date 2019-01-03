@@ -46,7 +46,6 @@ class MigrateController extends MY_Controller {
 
 	public function helpCliAction()
 	{
-		
 		$this->console->br()->out('php public/index.php cli/migrate/help');
 		$this->console->tab()->info('Display this help')->br();
 
@@ -197,6 +196,10 @@ class MigrateController extends MY_Controller {
 			/* verify it's a valid package */
 			$path = '/'.trim($raw_folder,'/');
 
+			if (substr($path,-strlen($this->migration_folder_path)) == $this->migration_folder_path) {
+				$path = substr($path,0,-strlen($this->migration_folder_path));
+			}
+
 			if (!file_exists(ROOTPATH.$folder)) {
 				show_error('"'.$path.'" does not seem to be a valid package path.');
 			}
@@ -205,7 +208,7 @@ class MigrateController extends MY_Controller {
 				mkdir(ROOTPATH.$folder.$this->migration_folder_path,0777,true);
 
 				if (!file_exists(ROOTPATH.$folder.$this->migration_folder_path)) {
-					show_error('"'.$path.'" does not seem to be a valid package migration path.');
+					show_error('"'.$folder.$this->migration_folder_path.'" does not seem to be a valid package migration path.');
 				}
 			}
 		}
