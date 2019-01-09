@@ -2,7 +2,6 @@
 
 class Deploy_helperController extends MY_Controller
 {
-
 	/**
 		Generate the Deploy JSON for adding all found GIT Repositories
 	 */
@@ -10,7 +9,7 @@ class Deploy_helperController extends MY_Controller
 	{
 		$console = new League\CLImate\CLImate;
 
-		$console->Blue()->out('Inspecting Packages');
+		$console->blue()->out('Inspecting Packages');
 
 		$autoload = load_config('autoload','autoload');
 		$packages = $autoload['packages'];
@@ -19,6 +18,8 @@ class Deploy_helperController extends MY_Controller
 		$packages = array_merge([''],$packages);
 
 		$progress = $console->progress()->total(count($packages));
+
+		sort($packages);
 
 		foreach ($packages as $idx=>$package) {
 			$progress->current($idx+1);
@@ -35,14 +36,20 @@ class Deploy_helperController extends MY_Controller
 			}
 		}
 
-		$console->br()->Blue()->out('Deploy commands to update packages - copy and paste as needed.');
-		$console->out(implode(','.PHP_EOL,$git_update));
+		if (is_array($git_update)) {
+			$console->br()->Blue()->out('Deploy commands to update packages - copy and paste as needed.');
+			$console->out(implode(','.PHP_EOL,$git_update));
+		}
 
-		$console->br()->Blue()->out('Deploy commands to migrate packages up - copy and paste as needed.');
-		$console->out(implode(','.PHP_EOL,$migrations));
-
-		$console->br()->Blue()->out('Deploy commands to checkout packages - copy and paste as needed.');
-		$console->out(implode(','.PHP_EOL,$checkout));
+		if (is_array($migrations)) {
+			$console->br()->Blue()->out('Deploy commands to migrate packages up - copy and paste as needed.');
+			$console->out(implode(','.PHP_EOL,$migrations));
+		}
+		
+		if (is_array($checkout)) {
+			$console->br()->Blue()->out('Deploy commands to checkout packages - copy and paste as needed.');
+			$console->out(implode(','.PHP_EOL,$checkout));
+		}
 	}
 
 	protected function get_remote($package)
@@ -50,13 +57,15 @@ class Deploy_helperController extends MY_Controller
 		$package = (empty($package)) ? ROOTPATH : $package;
 
 		if (file_exists($package.'/.git')) {
-			exec('cd '.$package.';git remote show origin',$output,$return_var);
+			$lines = file($package.'/.git/config');
 
-			foreach ($output as $line) {
+			foreach ($lines as $idx=>$line) {
 				$line = trim($line);
+			
+				if (substr($line,0,9) == '[remote "' && substr($line,-2) == '"]') {
+					$parts = explode(' ',trim($lines[$idx+1]));
 
-				if (substr(strtolower($line),0,11) == 'fetch url: ') {
-					return trim(substr($line,11));
+					return $parts[2];
 				}
 			}
 		}
