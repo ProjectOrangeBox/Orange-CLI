@@ -25,7 +25,10 @@ class Deploy_helperController extends MY_Controller
 			$progress->current($idx+1);
 
 			/* "gitx update {PWD}/packages/projectorangebox/extra-validations {GITBRANCH}" */
-			$git_update[] = '"gitx update {PWD}'.str_replace(ROOTPATH,'',$package).' {GITBRANCH}"';
+			$git_update[] = '"gitx update {PWD}'.str_replace(ROOTPATH,'',$package).'"';
+
+			/* "gitx update {PWD}/packages/projectorangebox/extra-validations {GITBRANCH}" */
+			$git_status[] = '"gitx status {PWD}'.str_replace(ROOTPATH,'',$package).'"';
 
 			/* "cd {PWD}/public;php index.php cli/migrate/up packages/projectorangebox/scaffolding" 	*/
 			$migrations[] = '"cd {PWD}/public;php index.php cli/migrate/up'.str_replace(ROOTPATH,' ',$package).'"';
@@ -37,17 +40,22 @@ class Deploy_helperController extends MY_Controller
 		}
 
 		if (is_array($git_update)) {
-			$console->br()->Blue()->out('Deploy commands to update packages - copy and paste as needed.');
+			$console->br()->blue()->out('Deploy commands to update packages - copy and paste as needed.');
 			$console->out(implode(','.PHP_EOL,$git_update));
 		}
 
+		if (is_array($git_status)) {
+			$console->br()->blue()->out('Deploy commands to display the current status for packages - copy and paste as needed.');
+			$console->out(implode(','.PHP_EOL,$git_status));
+		}
+
 		if (is_array($migrations)) {
-			$console->br()->Blue()->out('Deploy commands to migrate packages up - copy and paste as needed.');
+			$console->br()->blue()->out('Deploy commands to migrate packages up - copy and paste as needed.');
 			$console->out(implode(','.PHP_EOL,$migrations));
 		}
 		
 		if (is_array($checkout)) {
-			$console->br()->Blue()->out('Deploy commands to checkout packages - copy and paste as needed.');
+			$console->br()->blue()->out('Deploy commands to checkout packages - copy and paste as needed.');
 			$console->out(implode(','.PHP_EOL,$checkout));
 		}
 	}
