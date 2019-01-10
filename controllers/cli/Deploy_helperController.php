@@ -31,7 +31,7 @@ class Deploy_helperController extends MY_Controller
 			$git_status[] = '"gitx status {PWD}'.str_replace(ROOTPATH,'',$package).'"';
 
 			/* "cd {PWD}/public;php index.php cli/migrate/up packages/projectorangebox/scaffolding" 	*/
-			$migrations[] = '"cd {PWD}/public;php index.php cli/migrate/up'.str_replace(ROOTPATH,' ',$package).'"';
+			$migrations[] = '"cd {PWD};php public/index.php cli/migrate/up'.str_replace(ROOTPATH,' ',$package).'"';
 
 			if ($remote = $this->get_remote($package)) {
 				/* gitx checkout https://github.com/ProjectOrangeBox/Orange_v2_cli.git {PWD}/packages/projectorangebox/migrations {GITBRANCH} */
@@ -39,25 +39,23 @@ class Deploy_helperController extends MY_Controller
 			}
 		}
 
+		$console->br()->blue()->out('Deploy commands - copy and paste as needed.');
+
 		if (is_array($git_update)) {
-			$console->br()->blue()->out('Deploy commands to update packages - copy and paste as needed.');
-			$console->out(implode(','.PHP_EOL,$git_update));
+			$console->br()->out(implode(','.PHP_EOL,$git_update));
 		}
 
 		if (is_array($git_status)) {
-			$console->br()->blue()->out('Deploy commands to display the current status for packages - copy and paste as needed.');
-			$console->out(implode(','.PHP_EOL,$git_status));
+			$console->br()->out(implode(','.PHP_EOL,$git_status));
+		}
+
+		if (is_array($checkout)) {
+			$console->br()->out(implode(','.PHP_EOL,$checkout));
 		}
 
 		if (is_array($migrations)) {
-			$console->br()->blue()->out('Deploy commands to migrate packages up - copy and paste as needed.');
-			$console->out(implode(','.PHP_EOL,$migrations));
-		}
-		
-		if (is_array($checkout)) {
-			$console->br()->blue()->out('Deploy commands to checkout packages - copy and paste as needed.');
-			$console->out(implode(','.PHP_EOL,$checkout));
-		}
+			$console->br()->out(implode(','.PHP_EOL,$migrations));
+		}		
 	}
 
 	protected function get_remote($package)
