@@ -50,6 +50,10 @@ class HelpController extends MY_Controller {
 		{
 			$console->out('Trying to connect to '.$name);
 			
+			unset($values['password']);
+			
+			$console->out(json_encode($values,JSON_PRETTY_PRINT));
+			
 			try {
 				$this->load->database($name, true);
 				$console->tab()->info('Success');
@@ -57,8 +61,6 @@ class HelpController extends MY_Controller {
 				$console->tab()->error('Failed');
 			}
 		}
-
-
 
 	}
 	
