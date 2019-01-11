@@ -2,8 +2,8 @@
 
 class HelpController extends MY_Controller {
 	/**
-		Show all of the available Command Line Functions
-	*/
+	 * Show all of the available Command Line Functions
+	 */
 	public function indexCliAction() {
 		$console = new League\CLImate\CLImate;
 

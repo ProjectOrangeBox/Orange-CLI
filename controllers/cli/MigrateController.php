@@ -14,8 +14,7 @@ php public/index.php cli/migrate/find
 Create a new migration
 php public/index.php cli/migrate/create /packages/example/vendor "description with spaces"
 
- */
-
+*/
 class MigrateController extends MY_Controller {
 	protected $version_arg = 1;
 	protected $description_arg = 1;
@@ -37,98 +36,107 @@ class MigrateController extends MY_Controller {
 		$this->migration_folder_path = '/'.trim(str_replace(ROOTPATH,'',config('migration.migration_path','/support/migrations/')),'/');
 		$this->package_folder_path = $this->get_package();
 
-		ci('package_migration_cli_wrapper')->set_path($this->package_folder_path,$this->migration_folder_path);
-
 		$autoload = load_config('autoload','autoload');
 
 		$this->packages = $autoload['packages'];
 	}
+	
+	/**
+	 * show help
+	 */
+	public function indexCliAction()
+	{
+		$this->helpCliAction();
+	}
 
+	/**
+	 * show help
+	 */
 	public function helpCliAction()
 	{
-		$this->console->br()->out('php public/index.php cli/migrate/help');
+		$this->console->out('php public/index.php cli/migrate/help');
 		$this->console->tab()->info('Display this help')->br();
 
 		$this->console->out('php public/index.php cli/migrate/up');
 		$this->console->out('php public/index.php cli/migrate/latest');
-		$this->console->tab()->info('Run all migrations found in Application migration folder.')->br();
+		$this->console->tab()->info('Run all migrations found in the application migration folder.')->br();
 
 		$this->console->out('php public/index.php cli/migrate/up /packages/misc/orange_snippets');
 		$this->console->out('php public/index.php cli/migrate/latest /packages/misc/orange_snippets');
-		$this->console->tab()->info('Run all migrations found in /packages/misc/orange_snippets migration folder.')->br();
+		$this->console->tab()->info('Run all migrations found in the /packages/misc/orange_snippets migration folder.')->br();
 
 		$this->console->out('php public/index.php cli/migrate/down 3');
-		$this->console->tab()->info('Run all migrations down to number 3 in Application migration folder.')->br();
+		$this->console->tab()->info('Run all migrations down to number 3 in the application migration folder.')->br();
 
 		$this->console->out('php public/index.php cli/migrate/down /packages/misc/orange_snippets 3');
-		$this->console->tab()->info('Run all migrations down to number 3 in /packages/misc/orange_snippets migration folder.')->br();
+		$this->console->tab()->info('Run all migrations down to number 3 in the /packages/misc/orange_snippets migration folder.')->br();
 
 		$this->console->out('php public/index.php cli/migrate/current');
-		$this->console->tab()->info('Migrates up to the current version (whatever is set for $config[\'migration_version\'] in application/config/migration.php)..')->br();
+		$this->console->tab()->info('Migrates up to the current version in the application migration folder*');
+		$this->console->tab()->info('Whatever is set for $config[\'migration_version\'] in application/config/migration.php.')->br();
 
 		$this->console->out('php public/index.php cli/migrate/current /packages/misc/orange_snippets');
-		$this->console->tab()->info('Migrates up to the current version (whatever is set for $config[\'migration_version@/packages/misc/orange_snippets\'] in application/config/migration.php)..')->br();
+		$this->console->tab()->info('Migrates up to the current version in the /packages/misc/orange_snippets migration folder');
+		$this->console->tab()->info('Whatever is set for $config[\'migration_version@package folder\'] in application/config/migration.php.')->br();
+
 
 		$this->console->out('php public/index.php cli/migrate/version 3');
-		$this->console->tab()->info('Run all migrations in Application migration folder up or down to 3.')->br();
+		$this->console->tab()->info('Run all migrations in the application migration folder up or down to 3.')->br();
 
 		$this->console->out('php public/index.php cli/migrate/version /packages/misc/orange_snippets 3');
-		$this->console->tab()->info('Run all migrations in /packages/misc/orange_snippets migration folder up or down to 3.')->br();
+		$this->console->tab()->info('Run all migrations in the /packages/misc/orange_snippets migration folder up or down to 3.')->br();
 
 		$this->console->out('php public/index.php cli/migrate/find');
 		$this->console->tab()->info('Display all migration found.')->br();
 
-		$this->console->out('php public/index.php cli/migrate/packages');
-		$this->console->tab()->info('Display all packages found (this is great for copying and pasting the package path).')->br();
-
 		$this->console->out('php public/index.php cli/migrate/create "This is the migration"');
-		$this->console->tab()->info('Create an empty migration file in the Application migration folder.')->br();
+		$this->console->tab()->info('Create an empty migration file in the application migration folder.')->br();
 
 		$this->console->out('php public/index.php cli/migrate/version /packages/misc/orange_snippets "This is the migration"');
 		$this->console->tab()->info('Create an empty migration file in the /packages/misc/orange_snippets migration folder.')->br();
 	}
 
 	/**
-		Wrapper for migrate/current
+	 * Wrapper for migrate/current
 	 */
 	public function upCliAction()
 	{
-		ci('package_migration_cli_wrapper')->latest();
+		ci('package_migration_cli_wrapper')->set_path($this->package_folder_path,$this->migration_folder_path)->latest();
 	}
 
 	/**
-		Wrapper for migrate/version/###
+	 * Wrapper for migrate/version/###
 	 */
 	public function downCliAction()
 	{
-		ci('package_migration_cli_wrapper')->version((int)$this->get_section($this->version_arg,'version'));
+		ci('package_migration_cli_wrapper')->set_path($this->package_folder_path,$this->migration_folder_path)->version((int)$this->get_section($this->version_arg,'version'));
 	}
 
 	/* built in functions */
 
 	/**
-		This works much the same way as current() but instead of looking for the $config['migration_version']
-		the Migration class will use the very newest migration found in the filesystem.
-
-		https://www.codeigniter.com/user_guide/libraries/migration.html#CI_Migration::latest
-
-		TRUE if no migrations are found, current version string on success, FALSE on failure
-		 */
+	 * This works much the same way as current() but instead of looking for the $config['migration_version']
+	 * the Migration class will use the very newest migration found in the filesystem.
+	 *
+	 * https://www.codeigniter.com/user_guide/libraries/migration.html#CI_Migration::latest
+	 *
+	 * TRUE if no migrations are found, current version string on success, FALSE on failure
+	 */
 	public function latestCliAction()
 	{
-		ci('package_migration_cli_wrapper')->latest();
+		ci('package_migration_cli_wrapper')->set_path($this->package_folder_path,$this->migration_folder_path)->latest();
 	}
 
 	/**
-		Migrates up to the current version (whatever is set for $config['migration_version'] in application/config/migration.php).
-
-		https://www.codeigniter.com/user_guide/libraries/migration.html#CI_Migration::current
-
-		TRUE if no migrations are found, current version string on success, FALSE on failure
-		 */
+	 * Migrates up to the current version (whatever is set for $config['migration_version'] in application/config/migration.php).
+	 *
+	 * https://www.codeigniter.com/user_guide/libraries/migration.html#CI_Migration::current
+	 *
+	 * TRUE if no migrations are found, current version string on success, FALSE on failure
+	 */
 	public function currentCliAction()
 	{
-		$key = 'migration.migration_version@'.$this->package_folder_path;
+		$key = 'migration.migration_version@'.trim($this->package_folder_path,'/');
 
 		$version = config($key,false);
 
@@ -136,50 +144,47 @@ class MigrateController extends MY_Controller {
 			show_error('Not current configuration found for "'.$key.'".');
 		}
 
-		ci('package_migration_cli_wrapper')->current((int)$version);
+		ci('package_migration_cli_wrapper')->set_path($this->package_folder_path,$this->migration_folder_path)->current((int)$version);
 	}
 
 	/**
-		Version can be used to roll back changes or step forwards programmatically to specific versions.
-		It works just like current() but ignores $config['migration_version'].
-
-		https://www.codeigniter.com/user_guide/libraries/migration.html#CI_Migration::version
-
-		TRUE if no migrations are found, current version string on success, FALSE on failure
+	 * Version can be used to roll back changes or step forwards programmatically to specific versions.
+	 * It works just like current() but ignores $config['migration_version'].
+	 *
+	 * https://www.codeigniter.com/user_guide/libraries/migration.html#CI_Migration::version
+	 *
+	 * TRUE if no migrations are found, current version string on success, FALSE on failure
 	 */
 	public function versionCliAction()
 	{
-		ci('package_migration_cli_wrapper')->version((int)$this->get_section($this->version_arg,'version'));
+		ci('package_migration_cli_wrapper')->set_path($this->package_folder_path,$this->migration_folder_path)->version((int)$this->get_section($this->version_arg,'version'));
 	}
 
 	/**
-		Return an array of migration filenames that are found in the migration_path property.
-
-		https://www.codeigniter.com/user_guide/libraries/migration.html#CI_Migration::find_migrations
+	 * Return an array of migration filenames that are found in the migration_path property.
+	 *
+	 * https://www.codeigniter.com/user_guide/libraries/migration.html#CI_Migration::find_migrations
 	 */
 	public function findCliAction()
 	{
+		/* application */
 		ci('package_migration_cli_wrapper')->find();
 
-		/* look in each folder */
+		/* look in each package */
 		foreach ($this->packages as $package) {
 			ci('package_migration_cli_wrapper')->set_path($package,$this->migration_folder_path)->find();
 		}
 	}
 
-	public function packagesCliAction()
-	{
-		ci('package_migration_cli_wrapper')->packages($this->packages);
-	}
-
 	/**
-	Builds a standard migration template
+	 * Builds a standard migration template
 	 */
 	public function createCliAction()
 	{
-		ci('package_migration_cli_wrapper')->create($this->get_section($this->description_arg,'description'));
+		ci('package_migration_cli_wrapper')->set_path($this->package_folder_path,$this->migration_folder_path)->create($this->get_section($this->description_arg,'description'));
 	}
 
+	/* protected */
 	protected function get_package()
 	{
 		$path = '';

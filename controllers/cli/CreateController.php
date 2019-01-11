@@ -4,13 +4,20 @@ class CreateController extends MY_Controller {
 	protected $package_folder;
 	protected $console;
 
+	public function indexCliAction()
+	{
+		$console = new League\CLImate\CLImate;
+		$console->green('Syntax');
+		$console->yellow('php public/index.php cli/create/package foldername/packagename /item/details');
+	}
+
 	/**
-		Generate a generic package
-		
-		php index.php package_folder/package_name url_folder
-		
-	*/
-	public function packageCliAction() {
+	 *	Generate a generic package
+	 *	
+	 *	php index.php cli/create/package package_folder/package_name url_path
+	 */
+	public function packageCliAction()
+	{
 		$this->console = new League\CLImate\CLImate;
 		
 		$package = (isset($_SERVER['argv'][2])) ? trim($_SERVER['argv'][2],'/') : '';
@@ -60,7 +67,8 @@ class CreateController extends MY_Controller {
 		$this->make('support/migration/001_init.php','001_init',$data);
 	}
 
-	protected function make($name,$template=null,$data=[]) {
+	protected function make($name,$template=null,$data=[])
+	{
 		$name = ltrim($name,'/');
 	
 		if (!$template) {

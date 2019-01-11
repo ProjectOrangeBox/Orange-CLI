@@ -2,10 +2,18 @@
 
 class FindController extends MY_Controller {
 
+	public function indexCliAction()
+	{
+		$console = new League\CLImate\CLImate;
+		$console->green('Syntax');
+		$console->yellow('php public/index.php cli/find/file database_model');
+	}
+
 	/**
-		Search your application for files.
-	*/
-	public function fileCliAction($filename=null) {
+	 *	Search your application for files.
+	 */
+	public function fileCliAction($filename=null)
+	{
 		$console = new League\CLImate\CLImate;
 
 		if (!isset($_SERVER['argv'][2])) {

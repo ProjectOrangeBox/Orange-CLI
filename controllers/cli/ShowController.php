@@ -18,6 +18,53 @@ class ShowController extends MY_Controller {
 		$this->padding = $this->console->padding(40)->char(' ');
 	}
 
+	/**
+	 * show help
+	 */
+	public function indexCliAction()
+	{
+		$this->console->out('php public/index.php cli/show');
+		$this->console->out('php public/index.php cli/show/help');
+		$this->console->tab()->info('Display this help.')->br();
+
+		$this->console->out('php public/index.php cli/show/packages');
+		$this->console->tab()->info('Show all registered package paths.')->br();
+
+		$this->console->out('php public/index.php cli/show/pear');
+		$this->console->tab()->info('Show all registered pear plugins.')->br();
+
+		$this->console->out('php public/index.php cli/show/validate');
+		$this->console->tab()->info('Show all registered validations.')->br();
+
+		$this->console->out('php public/index.php cli/show/filter');
+		$this->console->tab()->info('Show all registered filters.')->br();
+
+		$this->console->out('php public/index.php cli/show/models');
+		$this->console->tab()->info('Show all registered models.')->br();
+
+		$this->console->out('php public/index.php cli/show/controllers');
+		$this->console->tab()->info('Show all registered controllers.')->br();
+
+		$this->console->out('php public/index.php cli/show/controller-traits');
+		$this->console->tab()->info('Show all registered controller traits.')->br();
+
+		$this->console->out('php public/index.php cli/show/middleware');
+		$this->console->tab()->info('Show all registered middleware.')->br();
+
+		$this->console->tab()->purple('** adding the -p option to any command will display the path instead of the available help.')->br();
+	}
+
+	/**
+	 * show help
+	 */
+	public function helpCliAction()
+	{
+		$this->indexCliAction();
+	}
+
+	/**
+	 * Show all registered packages. Use optional -p to show path instead of help
+	 */
 	public function packagesCliAction($arg=null)
 	{
 		$autoload = load_config('autoload','autoload');
@@ -31,7 +78,7 @@ class ShowController extends MY_Controller {
 	}
 
 	/**
-		Show all available validation classes. Use optional -p to show path instead of help
+	 * Show all registered validation classes. Use optional -p to show path instead of help
 	 */
 	public function validateCliAction($arg=null)
 	{
@@ -39,7 +86,7 @@ class ShowController extends MY_Controller {
 	}
 
 	/**
-		Show all available pear classes. Use optional -p to show path instead of help
+	 * Show all registered pear classes. Use optional -p to show path instead of help
 	 */
 	public function pearCliAction($arg=null)
 	{
@@ -47,7 +94,7 @@ class ShowController extends MY_Controller {
 	}
 
 	/**
-		Show all available filter classes. Use optional -p to show path instead of help
+	 * Show all registered filter classes. Use optional -p to show path instead of help
 	 */
 	public function filterCliAction($arg=null)
 	{
@@ -55,7 +102,7 @@ class ShowController extends MY_Controller {
 	}
 
 	/**
-		Show all available models classes. Use optional -p to show path instead of help
+	 * Show all registered models classes. Use optional -p to show path instead of help
 	 */
 	public function modelsCliAction($arg=null)
 	{
@@ -63,22 +110,30 @@ class ShowController extends MY_Controller {
 	}
 
 	/**
-		Show all available libraries classes. Use optional -p to show path instead of help
+	 * Show all registered libraries classes. Use optional -p to show path instead of help
 	 */
 	public function controllersCliAction($arg=null)
 	{
 		$this->options($arg)->loop_over('(.*)/controllers/(.*)Controller.php');
 	}
 
+	/**
+	 * Show all registered controller traits. Use optional -p to show path instead of help
+	 */
 	public function controller_traitsCliAction($arg=null)
 	{
 		$this->options($arg)->loop_over('(.*)/controllers/traits/(.*)controller_trait.php');
 	}
 
+	/**
+	 * Show all registered middleware. Use optional -p to show path instead of help
+	 */
 	public function middlewareCliAction($arg=null)
 	{
 		$this->options($arg)->loop_over('(.*)/middleware/(.*)Middleware.php');
 	}
+
+	/* protected */
 
 	protected function options($arg)
 	{
@@ -87,7 +142,7 @@ class ShowController extends MY_Controller {
 		} elseif (is_string($arg)) {
 			$this->details = $arg;
 		}
-		
+
 		return $this;
 	}
 
@@ -96,7 +151,7 @@ class ShowController extends MY_Controller {
 		$autoload = load_config('autoload','autoload');
 
 		$orange_paths = explode(PATH_SEPARATOR,rtrim(APPPATH,'/').PATH_SEPARATOR.implode(PATH_SEPARATOR,$autoload['packages']));
-		
+
 		foreach ($orange_paths as $path) {
 			$this->globr($path);
 		}

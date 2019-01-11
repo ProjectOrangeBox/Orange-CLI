@@ -3,7 +3,7 @@
 class Deploy_helperController extends MY_Controller
 {
 	/**
-		Generate the Deploy JSON for adding all found GIT Repositories
+	 * Generate the Deploy JSON for adding all found GIT Repositories
 	 */
 	public function indexCliAction()
 	{
