@@ -1,10 +1,12 @@
 <?php
 
 class HelpController extends MY_Controller {
+
 	/**
 	 * Show all of the available Command Line Functions
 	 */
-	public function indexCliAction() {
+	public function indexCliAction()
+	{
 		$console = new League\CLImate\CLImate;
 
 		$inspection = (new Fruit_inspector)->get_controllers_methods();
@@ -34,4 +36,30 @@ class HelpController extends MY_Controller {
 			}
 		}
 	}
+	
+	/**
+	 * Test all database connections (no query's run)
+	 */
+	public function test_databasesCliAction()
+	{
+		$console = new League\CLImate\CLImate;
+
+		$db = load_config('database','db');
+
+		foreach ($db as $name=>$values)
+		{
+			$console->out('Trying to connect to '.$name);
+			
+			try {
+				$this->load->database($name, true);
+				$console->tab()->info('Success');
+			} catch (Exception $e) {
+				$console->tab()->error('Failed');
+			}
+		}
+
+
+
+	}
+	
 } /* end class */
