@@ -4,9 +4,7 @@ class Migration_003_read_write_example extends Migration_base {
 
 	/* example up function */
 	public function up() {
-		$hash = $this->get_hash();
-
-		echo $hash.' up'.chr(10);
+		echo $this->migration('up');
 
 		$this->_add_rw_folder('/downloads/cookies');
 		
@@ -15,9 +13,7 @@ class Migration_003_read_write_example extends Migration_base {
 
 	/* example down function */
 	public function down() {
-		$hash = $this->get_hash();
-
-		echo $hash.' down'.chr(10);
+		echo $this->migration('down');
 
 		$this->_remove_rw_folder('/downloads/cookies');
 		

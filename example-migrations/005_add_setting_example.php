@@ -4,22 +4,18 @@ class Migration_005_add_setting_example extends Migration_base {
 
 	/* example up function */
 	public function up() {
-		$hash = $this->get_hash();
+		echo $this->migration('up');
 
-		echo $hash.' up'.chr(10);
-
-		ci('o_setting_model')->migration_add('Foobar','Example',0,'','',$hash);
+		ci('o_setting_model')->migration_add('Foobar','Example',0,'','',$this->hash());
 		
 		return true;
 	}
 
 	/* example down function */
 	public function down() {
-		$hash = $this->get_hash();
+		echo $this->migration('down');
 
-		echo $hash.' down'.chr(10);
-
-		ci('o_setting_model')->migration_remove($hash);
+		ci('o_setting_model')->migration_remove($this->hash());
 		
 		return true;
 	}

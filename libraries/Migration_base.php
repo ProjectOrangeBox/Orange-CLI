@@ -5,6 +5,7 @@ class Migration_base {
 	protected $_error_string = '';
 	protected $console;
 	protected $hash = null;
+	protected $migration;
 
 	public function __construct() {
 		/* we will probbly need this */
@@ -41,6 +42,18 @@ class Migration_base {
 		$this->hash = substr(str_replace([ROOTPATH.'/','/support/migrations'],'',$file),0,-4);
 
 		return $this->hash;
+	}
+	
+	protected function hash() {
+		$children = debug_backtrace(null,1);
+
+		return md5($children[0]['file']);
+	}
+	
+	protected function migration($direction) {
+		$children = debug_backtrace(null,1);
+		
+		return substr(str_replace(ROOTPATH,'',$children[0]['file']),0,-4).' '.$direction.PHP_EOL;
 	}
 
 	protected function e($output) {

@@ -4,9 +4,7 @@ class Migration_002_symlink_example extends Migration_base {
 
 	/* example up function */
 	public function up() {
-		$hash = $this->get_hash();
-
-		echo $hash.' up'.chr(10);
+		echo $this->migration('up');
 
 		$this->_link_public('/assets/example');
 		
@@ -15,9 +13,7 @@ class Migration_002_symlink_example extends Migration_base {
 
 	/* example down function */
 	public function down() {
-		$hash = $this->get_hash();
-
-		echo $hash.' down'.chr(10);
+		echo $this->migration('down');
 
 		$this->_unlink_public('/assets/example');
 		

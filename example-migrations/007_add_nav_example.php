@@ -4,24 +4,20 @@ class Migration_007_add_nav_example extends Migration_base {
 
 	/* example up function */
 	public function up() {
-		$hash = $this->get_hash();
+		echo $this->migration('up');
 
-		echo $hash.' up'.chr(10);
-
-		ci('o_nav_model')->migration_add('/scaffolding/columns','Columns',$hash);
-		ci('o_nav_model')->migration_add('/scaffolding/regenerate','Regenerate',$hash);
-		ci('o_nav_model')->migration_add('/scaffolding/tables','Tables',$hash);
+		ci('o_nav_model')->migration_add('/scaffolding/columns','Columns',$this->hash());
+		ci('o_nav_model')->migration_add('/scaffolding/regenerate','Regenerate',$this->hash());
+		ci('o_nav_model')->migration_add('/scaffolding/tables','Tables',$this->hash());
 		
 		return true;
 	}
 
 	/* example down function */
 	public function down() {
-		$hash = $this->get_hash();
+		echo $this->migration('down');
 
-		echo $hash.' down'.chr(10);
-
-		ci('o_nav_model')->migration_remove($hash);
+		ci('o_nav_model')->migration_remove($this->hash());
 		
 		return true;
 	}

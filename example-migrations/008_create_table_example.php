@@ -4,9 +4,7 @@ class Migration_008_create_table_example extends Migration_base {
 
 	/* example up function */
 	public function up() {
-		$hash = $this->get_hash();
-
-		echo $hash.' up'.chr(10);
+		echo $this->migration('up');
 
 		ci()->db->query('CREATE TABLE `category_mgr_members` (
 	`id` int(11) NOT NULL AUTO_INCREMENT,
@@ -18,9 +16,7 @@ class Migration_008_create_table_example extends Migration_base {
 
 	/* example down function */
 	public function down() {
-		$hash = $this->get_hash();
-
-		echo $hash.' down'.chr(10);
+		echo $this->migration('down');
 
 		ci()->db->query('DROP TABLE `category_mgr_members`;');
 
