@@ -38,9 +38,7 @@ class Package_migration_cli_wrapper {
 
 		if (count($found)) {
 			$highest = ci('package_migration')->get_version();
-
-			//$this->console->sub_heading('Current Version '.$highest);
-
+			
 			foreach ($found as $num=>$value) {
 				$text = substr_replace(basename($value),' ',3,1);
 
@@ -63,14 +61,13 @@ class Package_migration_cli_wrapper {
 
 	public function set_path($package,$folder)
 	{
-		$this->package = '/'.trim(str_replace(ROOTPATH,'',$package),'/');
-		$this->folder = '/'.trim($folder,'/');
+		$this->package = str_replace(ROOTPATH,'',$package);
 
-		ci('package_migration')->set_path(ROOTPATH.$this->package.$this->folder);
+		$path = '/'.trim('/'.trim($this->package,'/').'/'.trim($folder,'/'),'/');
 
-		$this->console->out('Migration search path switched to '.$this->package.$folder);
+		ci('package_migration')->set_path($path);
 
-		$this->find();
+		$this->console->out('Migration search path switched to '.$path);
 
 		return $this;
 	}

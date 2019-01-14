@@ -167,12 +167,14 @@ class MigrateController extends MY_Controller {
 	 */
 	public function findCliAction()
 	{
+		$migration_folder_in_folder = trim($this->migration_folder_path,'/');
+		
 		/* application */
-		ci('package_migration_cli_wrapper')->find();
+		ci('package_migration_cli_wrapper')->set_path('',$migration_folder_in_folder)->find();
 
 		/* look in each package */
 		foreach ($this->packages as $package) {
-			ci('package_migration_cli_wrapper')->set_path($package,$this->migration_folder_path)->find();
+			ci('package_migration_cli_wrapper')->set_path($package,$migration_folder_in_folder)->find();
 		}
 	}
 

@@ -321,7 +321,7 @@ class Package_migration {
 		$migrations = [];
 
 		// Load all *_*.php files in the migrations path
-		foreach (glob($this->_migration_path.'*_*.php') as $file) {
+		foreach (glob(ROOTPATH.$this->_migration_path.'*_*.php') as $file) {
 			$name = basename($file, '.php');
 
 			// Filter out non-migration files
