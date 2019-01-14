@@ -27,7 +27,7 @@ class HelpController extends MY_Controller {
 							$lines = explode(PHP_EOL,trim(substr($method['comments'],3,-2)));
 							
 							foreach ($lines as $l) {
-								$console->out('  '.trim($l));
+								$console->out(chr(9).preg_replace(array('/\s{2,}/', '/[\t\n]/'), ' ',trim($l)));
 							}
 						}
 
@@ -58,12 +58,58 @@ class HelpController extends MY_Controller {
 			
 			try {
 				$this->load->database($name,true);
-				$console->tab()->info('Success');
+				$console->info('* Success')->border();
 			} catch (Exception $e) {
-				$console->tab()->error('Failed');
+				$console->error('* Failed')->border();
 			}
 		}
 
+	}
+	
+	/**
+	 * Display current .env and .env.local as well as merged results
+	 */
+	public function envCliAction()
+	{
+		$console = new League\CLImate\CLImate;
+
+		$padding = $console->padding(32)->char('.');
+
+		$env = (file_exists('.env')) ? parse_ini_file('.env',true,INI_SCANNER_TYPED) : [];
+
+		$console->border()->info('.env');
+
+		$this->_env_loop($console,$padding,$env);
+
+		$env_local = (file_exists('.env.local')) ? parse_ini_file('.env.local',true,INI_SCANNER_TYPED) : [];
+
+		$console->info('.env.local');
+
+		$this->_env_loop($console,$padding,$env_local);
+
+		$console->info('Merged');
+
+		$merged = array_merge($_ENV,$env,$env_local);
+			
+		$this->_env_loop($console,$padding,$merged);
+
+	}
+	
+	protected function _env_loop(&$console,&$padding,$env)
+	{
+		foreach ($env as $label=>$result) {
+			if (is_array($result)) {
+				$padding->label($label)->result($result);
+				
+				foreach ($result as $l=>$r) {
+				$padding->label('  '.$l)->result($r);
+				}
+			} else {
+				$padding->label($label)->result($result);
+			}
+		}
+	
+		$console->border();
 	}
 	
 } /* end class */

@@ -24,18 +24,20 @@ class Deploy_helperController extends MY_Controller
 		foreach ($packages as $idx=>$package) {
 			$progress->current($idx+1);
 
-			/* "gitx update {PWD}/packages/projectorangebox/extra-validations {GITBRANCH}" */
-			$git_update[] = '"gitx update {PWD}'.str_replace(ROOTPATH,'',$package).'"';
+			$folder = '/'.trim(str_replace(ROOTPATH,'',$package),'/');
 
 			/* "gitx update {PWD}/packages/projectorangebox/extra-validations {GITBRANCH}" */
-			$git_status[] = '"gitx status {PWD}'.str_replace(ROOTPATH,'',$package).'"';
+			$git_update[] = '"gitx update {PWD}'.$folder.'"';
+
+			/* "gitx update {PWD}/packages/projectorangebox/extra-validations {GITBRANCH}" */
+			$git_status[] = '"gitx status {PWD}'.$folder.'"';
 
 			/* "cd {PWD}/public;php index.php cli/migrate/up packages/projectorangebox/scaffolding" 	*/
-			$migrations[] = '"cd {PWD};php public/index.php cli/migrate/up'.str_replace(ROOTPATH,' ',$package).'"';
+			$migrations[] = '"cd {PWD};php public/index.php cli/migrate/up'.$folder.'"';
 
 			if ($remote = $this->get_remote($package)) {
 				/* gitx checkout https://github.com/ProjectOrangeBox/Orange_v2_cli.git {PWD}/packages/projectorangebox/migrations {GITBRANCH} */
-				$checkout[] = '"gitx checkout '.$remote.' {PWD}'.str_replace(ROOTPATH,'',$package).' {GITBRANCH}"';
+				$checkout[] = '"gitx checkout '.$remote.' {PWD}'.$folder.' {GITBRANCH}"';
 			}
 		}
 
