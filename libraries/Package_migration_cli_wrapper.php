@@ -63,7 +63,7 @@ class Package_migration_cli_wrapper {
 
 	public function set_path($package,$folder)
 	{
-		$this->package = rtrim(str_replace(ROOTPATH,'',$package),'/');
+		$this->package = '/'.trim(str_replace(ROOTPATH,'',$package),'/');
 		$this->folder = '/'.trim($folder,'/');
 
 		ci('package_migration')->set_path(ROOTPATH.$this->package.$this->folder);
