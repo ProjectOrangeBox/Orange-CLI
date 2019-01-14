@@ -44,18 +44,20 @@ class HelpController extends MY_Controller {
 	{
 		$console = new League\CLImate\CLImate;
 
+		$padding = $console->padding(16)->char('.');
+
 		$db = load_config('database','db');
 
 		foreach ($db as $name=>$values)
 		{
-			$console->out('Trying to connect to '.$name);
+			$console->info($name);
 			
-			unset($values['password']);
-			
-			$console->out(json_encode($values,JSON_PRETTY_PRINT));
+			foreach (['dsn','hostname','username','password','database'] as $key) {
+				$padding->label($key)->result($values[$key]);
+			}
 			
 			try {
-				$this->load->database($name, true);
+				$this->load->database($name,true);
 				$console->tab()->info('Success');
 			} catch (Exception $e) {
 				$console->tab()->error('Failed');
