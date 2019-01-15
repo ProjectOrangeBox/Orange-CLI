@@ -67,7 +67,7 @@ class Package_migration_cli_wrapper {
 
 		ci('package_migration')->set_path($path);
 
-		$this->console->out('Migration search path switched to '.$path);
+		$this->console->border()->out('Migration search path switched to '.$path)->border();
 
 		return $this;
 	}
@@ -82,7 +82,7 @@ class Package_migration_cli_wrapper {
 		$filename = ci('package_migration')->create($description);
 
 		if ($filename) {
-			$this->console->success(str_replace(ROOTPATH,'',$filename).' created.');
+			$this->console->border()->success(str_replace(ROOTPATH,'',$filename).' created.')->border();
 		}
 	}
 
