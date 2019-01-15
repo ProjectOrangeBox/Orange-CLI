@@ -7,12 +7,14 @@ class Package_migration_cli_wrapper {
 	protected $console;
 	protected $package = '';
 	protected $folder = '';
+	protected $window_width;
 
 	/* https://www.codeigniter.com/user_guide/libraries/migration.html */
 
 	public function __construct()
 	{
 		$this->console = new League\CLImate\CLImate;
+		$this->window_width = (int)exec('tput cols');
 	}
 
 	public function latest()
@@ -48,6 +50,8 @@ class Package_migration_cli_wrapper {
 					$this->console->tab()->info('> '.$text);
 				}
 			}
+		} else {
+			$this->console->tab()->dim()->out('≈ No migrations found.');
 		}
 	}
 
@@ -67,7 +71,7 @@ class Package_migration_cli_wrapper {
 
 		ci('package_migration')->set_path($path);
 
-		$this->console->border()->out('Migration search path switched to '.$path)->border();
+		$this->console->border('-',$this->window_width)->out('Migration search path switched to '.$path)->border('-',$this->window_width);
 
 		return $this;
 	}
@@ -82,7 +86,7 @@ class Package_migration_cli_wrapper {
 		$filename = ci('package_migration')->create($description);
 
 		if ($filename) {
-			$this->console->border()->success(str_replace(ROOTPATH,'',$filename).' created.')->border();
+			$this->console->border('-',$this->window_width)->success(str_replace(ROOTPATH,'',$filename).' created.')->border('-',$this->window_width);
 		}
 	}
 
