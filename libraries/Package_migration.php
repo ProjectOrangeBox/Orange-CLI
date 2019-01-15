@@ -379,16 +379,17 @@ class Package_migration {
 		$name = ($description) ? filter('filename',$description) : 'migration';
 		$stamp = (config('migration.migration_type') == 'timestamp') ? date('YmdHis') : $this->get_next_sequential($this->_migration_path);
 
-		$file = $this->_migration_path.$stamp.'_'.$name.'.php';
+		$file = ROOTPATH.rtrim($this->_migration_path,'/').'/'.$stamp.'_'.$name.'.php';
 
-		$template = file_get_contents(__DIR__.'/Migration_template.tmpl');
-		$php = ci('parser')->parse_string($template,['name'=>basename($file,'.php')],true);
 
-		if (!is_writable(rtrim($this->_migration_path,'/'))) {
-			show_error('Can not write to '.rtrim($this->_migration_path,'/').chr(10));
+		if (!mkdir(dirname($file),0777,true)) {
+			show_error('Can not write to '.dirname($file).chr(10));
 		}
 
 		@unlink($file);
+
+		$template = file_get_contents(__DIR__.'/Migration_template.tmpl');
+		$php = ci('parser')->parse_string($template,['name'=>basename($file,'.php')],true);
 
 		$written = (file_put_contents($file,$php)) ? $file : false;
 
