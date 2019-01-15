@@ -35,7 +35,7 @@ class Migration_base {
 	}
 
 	protected function get_hash() {
-		$children = debug_backtrace(null,3);
+		$children = debug_backtrace(null,1);
 
 		$file = $children[0]['file'];
 
@@ -63,9 +63,9 @@ class Migration_base {
 	}
 
 	protected function _get_package() {
-		$child = debug_backtrace(null,3);
+		$children = debug_backtrace(null,1);
 
-		return str_replace(ROOTPATH,'',dirname(dirname(dirname($child[1]['file']))));
+		return str_replace(ROOTPATH,'',dirname(dirname(dirname($children[1]['file']))));
 	}
 
 	protected function _copy_config($filename) {
