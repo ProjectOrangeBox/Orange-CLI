@@ -8,6 +8,7 @@ class CreateController extends MY_Controller {
 	{
 		$console = new League\CLImate\CLImate;
 		$console->green('Syntax');
+		$console->info('php public/index.php cli/create/package {location to place package} {browser URL}');
 		$console->yellow('php public/index.php cli/create/package foldername/packagename /item/details');
 	}
 
