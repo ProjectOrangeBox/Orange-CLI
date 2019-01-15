@@ -381,12 +381,15 @@ class Package_migration {
 
 		$file = ROOTPATH.rtrim($this->_migration_path,'/').'/'.$stamp.'_'.$name.'.php';
 
-
-		if (!mkdir(dirname($file),0777,true)) {
-			show_error('Can not write to '.dirname($file).chr(10));
+		if (!file_exists(dirname($file))) {
+			if (!mkdir(dirname($file),0777,true)) {
+				show_error('Can not write to '.dirname($file).chr(10));
+			}
 		}
 
-		@unlink($file);
+		if (file_exists($file)) {
+			show_error('File "'.$file.'" already exists.'.PHP_EOL);
+		}
 
 		$template = file_get_contents(__DIR__.'/Migration_template.tmpl');
 		$php = ci('parser')->parse_string($template,['name'=>basename($file,'.php')],true);
