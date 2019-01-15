@@ -168,7 +168,7 @@ class ShowController extends MY_Controller {
 
 		foreach ($this->results as $name=>$entry) {
 			if ($this->path) {
-				$this->padding->label($name)->result($entry['path']);
+				$this->padding->label($name)->result(str_replace(ROOTPATH,'',$entry['path']));
 			} elseif ($this->details) {
 				if ($name == $this->details) {
 					$this->console->blue($name.' Detailed Help');
