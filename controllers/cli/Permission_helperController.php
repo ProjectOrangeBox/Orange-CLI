@@ -15,7 +15,7 @@ class Permission_helperController extends MY_Controller {
 		$groups = $this->build_groups();
 
 		if (!isset($_SERVER['argv'][2])) {
-			$this->show_avaiable('Please enter a dynamic controller url.',$groups,$console);
+			$this->show_available('Please enter a dynamic controller url.',$groups,$console);
 		}
 
 		if (isset($groups[$source_for])) {
@@ -27,7 +27,7 @@ class Permission_helperController extends MY_Controller {
 
 			$console->br();
 		} else {
-			$this->show_avaiable('No dynamic controller urls found at "'.$source_for.'"',$groups,$console);
+			$this->show_available('No dynamic controller urls found at "'.$source_for.'"',$groups,$console);
 		}
 	}
 
@@ -55,7 +55,7 @@ class Permission_helperController extends MY_Controller {
 		return $groups;
 	}
 
-	protected function show_avaiable($text,$groups,$console)
+	protected function show_available($text,$groups,$console)
 	{
 		$console->br()->error($text)->border('-',(int)exec('tput cols'));
 
