@@ -423,7 +423,7 @@ class Package_migration {
 
 	protected function get_next_sequential($folder)
 	{
-		list($highest) = explode('_',basename(end(glob($folder.'*_*.php'))),1);
+		list($highest) = explode('_',basename(end(glob(ROOTPATH.$folder.'*_*.php'))),1);
 
 		return substr('000'.((int)$highest+1),-3);
 	}
