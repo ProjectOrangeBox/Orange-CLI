@@ -1,12 +1,10 @@
 <?php
 
+/**
+ * Generate the Migration PHP for adding all found get http requests
+ */
 class Nav_helperController extends MY_Controller {
 
-	/**
-	 *
-	 * Generate the Migration PHP for adding all found get http requests
-	 *
-	 */
 	public function _remap($method)
 	{
 		$console = new League\CLImate\CLImate;

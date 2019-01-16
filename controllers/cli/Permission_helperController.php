@@ -1,12 +1,10 @@
 <?php
 
+/**
+ * Generate the Migration PHP for adding all found permissions
+ */
 class Permission_helperController extends MY_Controller {
 
-	/**
-	 *
-	 * Generate the Migration PHP for adding all found permissions
-	 *
-	 */
 	public function _remap($method)
 	{
 		$console = new League\CLImate\CLImate;
