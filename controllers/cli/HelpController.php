@@ -11,23 +11,21 @@ class HelpController extends MY_Controller {
 
 		$inspection = (new Fruit_inspector)->get_controllers_methods();
 
+		$output = [];
+
 		foreach ($inspection as $package) {
 			foreach ($package as $controller=>$details) {
 				$controller = $details['controller'];
 
 				foreach ($details['methods'] as $method) {
 					if ($method['request_method'] == 'cli' && $method['parent'] != 'MY_Controller') {
-						$console->border();
-
 						$action = ($method['action'] != 'index') ? '/'.$method['action'] : '';
-	
-						$console->info($controller['url'].$action);
 	
 						if (strlen($method['comments'])) {
 							$lines = explode(PHP_EOL,trim(substr($method['comments'],3,-2)));
 							
 							foreach ($lines as $l) {
-								$console->out(chr(9).preg_replace(array('/\s{2,}/', '/[\t\n]/'), ' ',trim($l)));
+								$output[$controller['url'].$action][] = ltrim(preg_replace(array('/\s{2,}/', '/[\t\n]/'), ' ',trim($l)),' *');
 							}
 						}
 
@@ -35,6 +33,19 @@ class HelpController extends MY_Controller {
 				}
 			}
 		}
+
+		ksort($output);
+
+		foreach ($output as $controller=>$data) {
+			$console->border();
+		
+			$console->info($controller);
+		
+			foreach ($data as $line) {
+				$console->out(chr(9).$line);
+			}
+		}
+		
 	}
 	
 	/**
