@@ -47,13 +47,23 @@ class Migration_base {
 	protected function hash() {
 		$children = debug_backtrace(null,1);
 
-		return md5($children[0]['file']);
+		$this->hash = md5($children[0]['file']);
+
+		return $this->hash;
 	}
 	
-	protected function migration($direction) {
+	protected function migration($direction,$as_string=true) {
 		$children = debug_backtrace(null,1);
 		
-		return substr(str_replace(ROOTPATH,'',$children[0]['file']),0,-4).' '.$direction.PHP_EOL;
+		$this->hash = md5($children[0]['file']);
+		
+		$data = [
+			'migration'=>substr(str_replace(ROOTPATH,'',$children[0]['file']),0,-4),
+			'direction'=>$direction,
+			'hash'=>md5($children[0]['file']),
+		];
+		
+		return ($as_string) ? 'Migrations: '.$data['migration'].PHP_EOL.' Direction: '.$data['direction'].PHP_EOL.'      Hash: '.$data['hash'].PHP_EOL.PHP_EOL : $data;
 	}
 
 	protected function e($output) {
