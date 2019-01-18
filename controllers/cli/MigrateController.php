@@ -1,21 +1,23 @@
 <?php
 /**
-Migrates up to the current version
-php public/index.php cli/migrate/up /packages/example/vendor
-php public/index.php cli/migrate/latest /packages/example/vendor
-
-Roll back changes or step forwards programmatically to specific versions
-php public/index.php cli/migrate/version /packages/example/vendor 2
-php public/index.php cli/migrate/down /packages/example/vendor 2
-
-Find all migrations and show status
-php public/index.php cli/migrate/find
-
-Create a new migration
-php public/index.php cli/migrate/create /packages/example/vendor "description with spaces"
-
-*/
-class MigrateController extends MY_Controller {
+ * 
+ * Migrates up to the current version
+ * php public/index.php cli/migrate/up /packages/example/vendor
+ * php public/index.php cli/migrate/latest /packages/example/vendor
+ * 
+ * Roll back changes or step forwards programmatically to specific versions
+ * php public/index.php cli/migrate/version /packages/example/vendor 2
+ * php public/index.php cli/migrate/down /packages/example/vendor 2
+ * 
+ * Find all migrations and show status
+ * php public/index.php cli/migrate/find
+ * 
+ * Create a new migration
+ * php public/index.php cli/migrate/create /packages/example/vendor "description with spaces"
+ * 
+ *
+ */
+ class MigrateController extends MY_Controller {
 	protected $version_arg = 1;
 	protected $description_arg = 1;
 	protected $folder_arg = 1;
@@ -39,10 +41,10 @@ class MigrateController extends MY_Controller {
 		$autoload = load_config('autoload','autoload');
 
 		$this->packages = $autoload['packages'];
-		
+
 		ci('package_migration_cli_wrapper')->set_path($this->package_folder_path,$this->migration_folder_path);
 	}
-	
+
 	/**
 	 * show help
 	 */
@@ -177,6 +179,8 @@ class MigrateController extends MY_Controller {
 		foreach ($this->packages as $package) {
 			ci('package_migration_cli_wrapper')->set_path($package,$this->migration_folder_path)->find();
 		}
+
+		$this->console->border('-',(int)exec('tput cols'));
 	}
 
 	/**
