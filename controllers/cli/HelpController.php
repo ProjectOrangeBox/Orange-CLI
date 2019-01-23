@@ -22,11 +22,18 @@ class HelpController extends MY_Controller {
 						$action = ($method['action'] != 'index') ? '/'.$method['action'] : '';
 	
 						if (strlen($method['comments'])) {
-							$lines = explode(PHP_EOL,trim(substr($method['comments'],3,-2)));
+							$lines = explode(PHP_EOL,trim($method['comments']));
+							$comments = '';
 							
 							foreach ($lines as $l) {
-								$output[$controller['url'].$action][] = ltrim(preg_replace(array('/\s{2,}/', '/[\t\n]/'), ' ',trim($l)),' *');
+								$clean = ltrim($l,' */\\'.chr(9).chr(10).chr(13));
+								
+								if (!empty($clean)) {
+									$comments .= chr(9).$clean.PHP_EOL;
+								}
 							}
+							
+							$output[$controller['url'].$action] = $comments;
 						}
 
 					}
@@ -36,16 +43,9 @@ class HelpController extends MY_Controller {
 
 		ksort($output);
 
-		foreach ($output as $controller=>$data) {
-			$console->border();
-		
-			$console->info($controller);
-		
-			foreach ($data as $line) {
-				$console->out(chr(9).$line);
-			}
+		foreach ($output as $controller=>$comment) {
+			$console->border('-',(int)exec('tput cols'))->info($controller)->out($comment);
 		}
-		
 	}
 	
 	/**
