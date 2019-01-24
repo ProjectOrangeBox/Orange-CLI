@@ -142,7 +142,7 @@ class Fruit_inspector {
 		$new_class_filepath = false;
 	
 		if (substr(basename($real_path),0,1) != '.') {
-			$new_class_name = 'Fake_'.md5($real_path);
+			$new_class_name = 'Fake_'.md5(uniqid('', true));
 			$new_class_filepath = CACHEPATH.'/'.$new_class_name.'.php';
 			$old_class_name = basename($real_path,'.php');
 	

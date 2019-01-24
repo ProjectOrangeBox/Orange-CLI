@@ -17,7 +17,7 @@
  * 
  *
  */
- class MigrateController extends MY_Controller {
+class MigrateController extends MY_Controller {
 	protected $version_arg = 1;
 	protected $description_arg = 1;
 	protected $folder_arg = 1;
