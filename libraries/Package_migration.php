@@ -374,7 +374,7 @@ class Package_migration {
 		return $this;
 	}
 
-	public function create($description)
+	public function create($description,$up='',$down='')
 	{
 		$name = ($description) ? filter('filename',$description) : 'migration';
 		$stamp = (config('migration.migration_type') == 'timestamp') ? date('YmdHis') : $this->get_next_sequential($this->_migration_path);
@@ -392,7 +392,8 @@ class Package_migration {
 		}
 
 		$template = file_get_contents(__DIR__.'/Migration_template.tmpl');
-		$php = ci('parser')->parse_string($template,['name'=>basename($file,'.php')],true);
+		
+		$php = ci('parser')->parse_string($template,['name'=>basename($file,'.php'),'up'=>$up,'down'=>$down],true);
 
 		$written = (file_put_contents($file,$php)) ? $file : false;
 

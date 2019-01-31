@@ -81,9 +81,9 @@ class Package_migration_cli_wrapper {
 		return $this->package.$this->folder;
 	}
 
-	public function create($description)
+	public function create($description,$up='',$down='')
 	{
-		$filename = ci('package_migration')->create($description);
+		$filename = ci('package_migration')->create($description,$up,$down);
 
 		if ($filename) {
 			$this->console->border('-',$this->window_width)->success(str_replace(ROOTPATH,'',$filename).' created.')->border('-',$this->window_width);
