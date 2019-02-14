@@ -1,6 +1,7 @@
 <?php
 
-class ShowController extends MY_Controller {
+class ShowController extends MY_Controller
+{
 	protected $console;
 	protected $padding;
 	protected $results = [];
@@ -67,14 +68,13 @@ class ShowController extends MY_Controller {
 	 */
 	public function packagesCliAction($arg=null)
 	{
-		$autoload = load_config('autoload','autoload');
+		$autoload = load_config('autoload', 'autoload');
 
-		$orange_paths = explode(PATH_SEPARATOR,rtrim(APPPATH,'/').PATH_SEPARATOR.implode(PATH_SEPARATOR,$autoload['packages']));
+		$orange_paths = explode(PATH_SEPARATOR, rtrim(APPPATH, '/').PATH_SEPARATOR.implode(PATH_SEPARATOR, $autoload['packages']));
 
 		foreach ($orange_paths as $path) {
 			$this->console->out($path);
 		}
-
 	}
 
 	/**
@@ -148,9 +148,9 @@ class ShowController extends MY_Controller {
 
 	protected function loop_over($regex)
 	{
-		$autoload = load_config('autoload','autoload');
+		$autoload = load_config('autoload', 'autoload');
 
-		$orange_paths = explode(PATH_SEPARATOR,rtrim(APPPATH,'/').PATH_SEPARATOR.implode(PATH_SEPARATOR,$autoload['packages']));
+		$orange_paths = explode(PATH_SEPARATOR, rtrim(APPPATH, '/').PATH_SEPARATOR.implode(PATH_SEPARATOR, $autoload['packages']));
 
 		foreach ($orange_paths as $path) {
 			$this->globr($path);
@@ -159,16 +159,16 @@ class ShowController extends MY_Controller {
 		foreach ($this->files as $name=>$path) {
 			if (preg_match_all('#^'.$regex.'$#im', $path, $matches, PREG_SET_ORDER, 0)) {
 				if (is_array($matches)) {
-					$this->get_path($name,$path);
-					$this->get_help($name,$path,'@help');
-					$this->get_help_between($name,$path,'@details');
+					$this->get_path($name, $path);
+					$this->get_help($name, $path, '@help');
+					$this->get_help_between($name, $path, '@details');
 				}
 			}
 		}
 
 		foreach ($this->results as $name=>$entry) {
 			if ($this->path) {
-				$this->padding->label($name)->result(str_replace(ROOTPATH,'',$entry['path']));
+				$this->padding->label($name)->result(str_replace(ROOTPATH, '', $entry['path']));
 			} elseif ($this->details) {
 				if ($name == $this->details) {
 					$this->console->blue($name.' Detailed Help');
@@ -187,12 +187,12 @@ class ShowController extends MY_Controller {
 		}
 	}
 
-	protected function get_path($name,$path)
+	protected function get_path($name, $path)
 	{
 		$this->results[$name]['path'] = $path;
 	}
 
-	protected function get_help($name,$filepath,$tag)
+	protected function get_help($name, $filepath, $tag)
 	{
 		$help = [];
 
@@ -205,11 +205,11 @@ class ShowController extends MY_Controller {
 		$this->results[$name]['help'] = $help;
 	}
 
-	protected function get_help_between($name,$filepath,$tag)
+	protected function get_help_between($name, $filepath, $tag)
 	{
 		$details = '';
 
-		if (preg_match_all('/'.$tag.'(.*)'.$tag.'/ims',file_get_contents($filepath), $matches, PREG_SET_ORDER, 0)) {
+		if (preg_match_all('/'.$tag.'(.*)'.$tag.'/ims', file_get_contents($filepath), $matches, PREG_SET_ORDER, 0)) {
 			$details = trim($matches[0][1]);
 		}
 
@@ -219,7 +219,7 @@ class ShowController extends MY_Controller {
 	protected function globr($path)
 	{
 		if (file_exists($path)) {
-			$files = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($path),RecursiveIteratorIterator::SELF_FIRST);
+			$files = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($path), RecursiveIteratorIterator::SELF_FIRST);
 			foreach ($files as $f) {
 				if ($f->getExtension() == 'php') {
 					$this->files[$f->getBasename('.php')] = $f->getRealPath();
@@ -227,5 +227,4 @@ class ShowController extends MY_Controller {
 			}
 		}
 	}
-
 }

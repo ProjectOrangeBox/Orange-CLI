@@ -1,6 +1,7 @@
 <?php
 
-class CreateController extends MY_Controller {
+class CreateController extends MY_Controller
+{
 	protected $package_folder;
 	protected $console;
 
@@ -14,15 +15,15 @@ class CreateController extends MY_Controller {
 
 	/**
 	 *	Generate a generic package
-	 *	
+	 *
 	 *	php index.php cli/create/package package_folder/package_name url_path
 	 */
 	public function packageCliAction()
 	{
 		$this->console = new League\CLImate\CLImate;
 		
-		$package = (isset($_SERVER['argv'][2])) ? trim($_SERVER['argv'][2],'/') : '';
-		$folder =  (isset($_SERVER['argv'][3])) ? trim($_SERVER['argv'][3],'/') : '';
+		$package = (isset($_SERVER['argv'][2])) ? trim($_SERVER['argv'][2], '/') : '';
+		$folder =  (isset($_SERVER['argv'][3])) ? trim($_SERVER['argv'][3], '/') : '';
 
 		if (empty($package)) {
 			$this->console->error('Please provide a package path');
@@ -41,8 +42,8 @@ class CreateController extends MY_Controller {
 		}
 
 		/* make the package folder */
-		@mkdir($this->package_folder,0775,true);
-		@chmod($this->package_folder,0775);
+		@mkdir($this->package_folder, 0775, true);
+		@chmod($this->package_folder, 0775);
 
 		$controller_filename = basename($folder);
 
@@ -57,24 +58,24 @@ class CreateController extends MY_Controller {
 			'plural'=>plural(humanize($controller_filename)),
 		];
 
-		$this->make('controllers/'.dirname($folder).'/'.ucfirst($controller_filename).'Controller.php','controller',$data);
-		$this->make('models/'.ucfirst($controller_filename).'_model.php','model',$data);
-		$this->make('views/'.$folder.'/index.php','index',$data);
-		$this->make('views/'.$folder.'/details.php','details',$data);
+		$this->make('controllers/'.dirname($folder).'/'.ucfirst($controller_filename).'Controller.php', 'controller', $data);
+		$this->make('models/'.ucfirst($controller_filename).'_model.php', 'model', $data);
+		$this->make('views/'.$folder.'/index.php', 'index', $data);
+		$this->make('views/'.$folder.'/details.php', 'details', $data);
 
 		$this->make('libraries');
 		$this->make('support');
 		$this->make('support/migration');
-		$this->make('support/migration/001_init.php','001_init',$data);
+		$this->make('support/migration/001_init.php', '001_init', $data);
 	}
 
-	protected function make($name,$template=null,$data=[])
+	protected function make($name, $template=null, $data=[])
 	{
-		$name = ltrim($name,'/');
+		$name = ltrim($name, '/');
 	
 		if (!$template) {
-			@mkdir($this->package_folder.'/'.$name,0775,true);
-			@chmod($this->package_folder.'/'.$name,0775);
+			@mkdir($this->package_folder.'/'.$name, 0775, true);
+			@chmod($this->package_folder.'/'.$name, 0775);
 		} else {
 			$template_file = realpath(__DIR__.'/../../support/templates/'.$template.'.php');
 			
@@ -85,17 +86,16 @@ class CreateController extends MY_Controller {
 			$template = file_get_contents($template_file);
 	
 			foreach ($data as $key=>$val) {
-				$template = str_replace('{'.$key.'}',$val,$template);
+				$template = str_replace('{'.$key.'}', $val, $template);
 			}
 	
 			$path = $this->package_folder.'/'.$name;
 
 			$this->console->info('Using Template "'.$template_file.'" to create "'.$path.'".');
 	
-			@mkdir(dirname($path),0775,true);
-			file_put_contents($path,$template);
-			@chmod($path,0775);
+			@mkdir(dirname($path), 0775, true);
+			file_put_contents($path, $template);
+			@chmod($path, 0775);
 		}
 	}
-
 }

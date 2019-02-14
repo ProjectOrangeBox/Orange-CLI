@@ -1,9 +1,11 @@
 <?php
 
-class Migration_005_add_setting_example extends Migration_base {
+class Migration_005_add_setting_example extends Migration_base
+{
 
 	/* example up function */
-	public function up() {
+	public function up()
+	{
 		echo $this->migration('up');
 
 		/**
@@ -24,18 +26,18 @@ class Migration_005_add_setting_example extends Migration_base {
 		 * $optional=[]; additional options
 		 *
 		 */
-		ci('o_setting_model')->migration_add('Foobar','Example',0,'','',$this->hash());
+		ci('o_setting_model')->migration_add('Foobar', 'Example', 0, '', '', $this->hash());
 
 		return true;
 	}
 
 	/* example down function */
-	public function down() {
+	public function down()
+	{
 		echo $this->migration('down');
 
 		ci('o_setting_model')->migration_remove($this->hash());
 
 		return true;
 	}
-
 } /* end migration */

@@ -11,11 +11,11 @@ class Deploy_helperController extends MY_Controller
 
 		$console->blue()->out('Inspecting Packages');
 
-		$autoload = load_config('autoload','autoload');
+		$autoload = load_config('autoload', 'autoload');
 		$packages = $autoload['packages'];
 
 		/* this adds root application folder */
-		$packages = array_merge([''],$packages);
+		$packages = array_merge([''], $packages);
 
 		$progress = $console->progress()->total(count($packages));
 
@@ -24,7 +24,7 @@ class Deploy_helperController extends MY_Controller
 		foreach ($packages as $idx=>$package) {
 			$progress->current($idx+1);
 
-			$folder = '/'.trim(str_replace(ROOTPATH,'',$package),'/');
+			$folder = '/'.trim(str_replace(ROOTPATH, '', $package), '/');
 
 			/* "gitx update {PWD}/packages/projectorangebox/extra-validations {GITBRANCH}" */
 			$git_update[] = '"gitx update {PWD}'.$folder.'"';
@@ -44,20 +44,20 @@ class Deploy_helperController extends MY_Controller
 		$console->br()->blue()->out('Deploy commands - copy and paste as needed.');
 
 		if (is_array($git_update)) {
-			$console->br()->out(implode(','.PHP_EOL,$git_update));
+			$console->br()->out(implode(','.PHP_EOL, $git_update));
 		}
 
 		if (is_array($git_status)) {
-			$console->br()->out(implode(','.PHP_EOL,$git_status));
+			$console->br()->out(implode(','.PHP_EOL, $git_status));
 		}
 
 		if (is_array($checkout)) {
-			$console->br()->out(implode(','.PHP_EOL,$checkout));
+			$console->br()->out(implode(','.PHP_EOL, $checkout));
 		}
 
 		if (is_array($migrations)) {
-			$console->br()->out(implode(','.PHP_EOL,$migrations));
-		}		
+			$console->br()->out(implode(','.PHP_EOL, $migrations));
+		}
 	}
 
 	protected function get_remote($package)
@@ -70,8 +70,8 @@ class Deploy_helperController extends MY_Controller
 			foreach ($lines as $idx=>$line) {
 				$line = trim($line);
 			
-				if (substr($line,0,9) == '[remote "' && substr($line,-2) == '"]') {
-					$parts = explode(' ',trim($lines[$idx+1]));
+				if (substr($line, 0, 9) == '[remote "' && substr($line, -2) == '"]') {
+					$parts = explode(' ', trim($lines[$idx+1]));
 
 					return $parts[2];
 				}
@@ -80,5 +80,4 @@ class Deploy_helperController extends MY_Controller
 
 		return false;
 	}
-
 }

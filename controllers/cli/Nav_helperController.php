@@ -1,13 +1,16 @@
 <?php
 
-class Nav_helperController extends MY_Controller {
+class Nav_helperController extends MY_Controller
+{
 
 	/**
-	 * 
+	 *
 	 * Generate the Migration PHP for adding all found get http requests
 	 *
 	 */
- 	public function indexCliAction(){} /* so help shows up */
+	public function indexCliAction()
+	{
+	} /* so help shows up */
 
 	public function _remap($method)
 	{
@@ -17,12 +20,12 @@ class Nav_helperController extends MY_Controller {
 		}
 
 		$console = new League\CLImate\CLImate;
-		$source_for = str_replace('-','_',trim($_SERVER['argv'][2],'/'));
+		$source_for = str_replace('-', '_', trim($_SERVER['argv'][2], '/'));
 
 		$groups = $this->build_groups();
 
 		if (!isset($_SERVER['argv'][2])) {
-			$this->show_available('Please enter a dynamic controller url.',$groups,$console);
+			$this->show_available('Please enter a dynamic controller url.', $groups, $console);
 		}
 
 		if (isset($groups[$source_for])) {
@@ -34,12 +37,12 @@ class Nav_helperController extends MY_Controller {
 
 			$console->br();
 		} else {
-			$this->show_available('No dynamic controller urls found at "'.$source_for.'"',$groups,$console);
+			$this->show_available('No dynamic controller urls found at "'.$source_for.'"', $groups, $console);
 		}
 	}
 
 	/**
-	 * 
+	 *
 	 * Generate the actual Migration file for adding all found get http requests for the given package
 	 * php public/index.php cli/nav_helper/migration /admin/products
 	 *
@@ -47,12 +50,12 @@ class Nav_helperController extends MY_Controller {
 	public function migrationCliAction()
 	{
 		$console = new League\CLImate\CLImate;
-		$source_for = str_replace('-','_',trim($_SERVER['argv'][2],'/'));
+		$source_for = str_replace('-', '_', trim($_SERVER['argv'][2], '/'));
 
 		$groups = $this->build_groups();
 
 		if (!isset($_SERVER['argv'][2])) {
-			$this->show_available('Please enter a dynamic controller url.',$groups,$console);
+			$this->show_available('Please enter a dynamic controller url.', $groups, $console);
 		}
 
 		if (isset($groups[$source_for])) {
@@ -62,13 +65,13 @@ class Nav_helperController extends MY_Controller {
 				$source .= $s.PHP_EOL;
 			}
 
-			$migration_folder_path = '/'.trim(str_replace(ROOTPATH,'',config('migration.migration_path','/support/migrations/')),'/');
+			$migration_folder_path = '/'.trim(str_replace(ROOTPATH, '', config('migration.migration_path', '/support/migrations/')), '/');
 	
 			$package = $this->reverse[$source_for];
 		
-			ci('package_migration_cli_wrapper')->set_path($package,$migration_folder_path)->create('nav_helper_'.time('ymd'),$source,'ci(\'o_nav_model\')->migration_remove($this->hash());');
+			ci('package_migration_cli_wrapper')->set_path($package, $migration_folder_path)->create('nav_helper_'.time('ymd'), $source, 'ci(\'o_nav_model\')->migration_remove($this->hash());');
 		} else {
-			$this->show_available('No dynamic controller urls found at "'.$source_for.'"',$groups,$console);
+			$this->show_available('No dynamic controller urls found at "'.$source_for.'"', $groups, $console);
 		}
 	}
 
@@ -80,15 +83,15 @@ class Nav_helperController extends MY_Controller {
 		foreach ($inspection as $package) {
 			foreach ($package as $controller=>$details) {
 				$controller = $details['controller'];
-				$this->reverse[trim($controller['url'],'/')] = $details['controller']['package'];
+				$this->reverse[trim($controller['url'], '/')] = $details['controller']['package'];
 				foreach ($details['methods'] as $method) {
 					if ($method['request_method'] == 'get') {
 						$action = ($method['action'] == 'index') ? '' : $method['action'];
-						$url = str_replace('_','-','/'.strtolower(trim($controller['url'].'/'.$action,'/')));
-						$text = trim(ucwords(strtolower(str_replace(['/','_','-'],' ',$url))),' ');
+						$url = str_replace('_', '-', '/'.strtolower(trim($controller['url'].'/'.$action, '/')));
+						$text = trim(ucwords(strtolower(str_replace(['/','_','-'], ' ', $url))), ' ');
 
 
-						$groups[trim($controller['url'],'/')][] = "ci('o_nav_model')->migration_add('".$url."','".$text."',\$this->get_hash());";
+						$groups[trim($controller['url'], '/')][] = "ci('o_nav_model')->migration_add('".$url."','".$text."',\$this->get_hash());";
 					}
 				}
 			}
@@ -97,9 +100,9 @@ class Nav_helperController extends MY_Controller {
 		return $groups;
 	}
 
-	protected function show_available($text,$groups,$console)
+	protected function show_available($text, $groups, $console)
 	{
-		$console->br()->error($text)->border('-',(int)exec('tput cols'));
+		$console->br()->error($text)->border('-', (int)exec('tput cols'));
 
 		foreach ($groups as $url=>$source) {
 			$console->out('/'.$url);
@@ -108,5 +111,4 @@ class Nav_helperController extends MY_Controller {
 		$console->br();
 		exit(1);
 	}
-
 } /* end controller */

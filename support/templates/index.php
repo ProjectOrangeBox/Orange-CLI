@@ -1,6 +1,6 @@
-<? pear::extends('_templates/orange_admin') ?>
+<?php pear::extends('_templates/orange_admin') ?>
 
-<? pear::section('section_container') ?>
+<?php pear::section('section_container') ?>
 
 <div class="row">
   <div class="col-md-6"><h3><i class="fa fa-{fa_icon}"></i> <?=$controller_titles ?></h3></div>
@@ -20,7 +20,8 @@
 				</tr>
 			</thead>
 		<tbody>
-			<? foreach ($records as $row) { ?>
+			<?php foreach ($records as $row) {
+	?>
 			<tr>
 				<td class="{index_column_class}">
 					{html}
@@ -29,9 +30,10 @@
 					{html}
 				</td>
 			</tr>
-			<? } ?>
+			<?php
+} ?>
 		</tbody>
 	</table>
 </div>
 
-<? pear::end() ?>
+<?php pear::end() ?>

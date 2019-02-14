@@ -1,6 +1,7 @@
 <?php
 
-class HelpController extends MY_Controller {
+class HelpController extends MY_Controller
+{
 
 	/**
 	 * Show all of the available Command Line Functions
@@ -22,11 +23,11 @@ class HelpController extends MY_Controller {
 						$action = ($method['action'] != 'index') ? '/'.$method['action'] : '';
 	
 						if (strlen($method['comments'])) {
-							$lines = explode(PHP_EOL,trim($method['comments']));
+							$lines = explode(PHP_EOL, trim($method['comments']));
 							$comments = '';
 							
 							foreach ($lines as $l) {
-								$clean = ltrim($l,' */\\'.chr(9).chr(10).chr(13));
+								$clean = ltrim($l, ' */\\'.chr(9).chr(10).chr(13));
 								
 								if (!empty($clean)) {
 									$comments .= chr(9).$clean.PHP_EOL;
@@ -35,7 +36,6 @@ class HelpController extends MY_Controller {
 							
 							$output[$controller['url'].$action] = $comments;
 						}
-
 					}
 				}
 			}
@@ -44,7 +44,7 @@ class HelpController extends MY_Controller {
 		ksort($output);
 
 		foreach ($output as $controller=>$comment) {
-			$console->border('-',(int)exec('tput cols'))->info($controller)->out($comment);
+			$console->border('-', (int)exec('tput cols'))->info($controller)->out($comment);
 		}
 	}
 	
@@ -57,10 +57,9 @@ class HelpController extends MY_Controller {
 
 		$padding = $console->padding(16)->char('.');
 
-		$db = load_config('database','db');
+		$db = load_config('database', 'db');
 
-		foreach ($db as $name=>$values)
-		{
+		foreach ($db as $name=>$values) {
 			$console->info($name);
 			
 			foreach (['dsn','hostname','username','password','database'] as $key) {
@@ -68,13 +67,12 @@ class HelpController extends MY_Controller {
 			}
 			
 			try {
-				$this->load->database($name,true);
+				$this->load->database($name, true);
 				$console->info('* Success')->border();
 			} catch (Exception $e) {
 				$console->error('* Failed')->border();
 			}
 		}
-
 	}
 	
 	/**
@@ -86,34 +84,33 @@ class HelpController extends MY_Controller {
 
 		$padding = $console->padding(32)->char('.');
 
-		$env = (file_exists('.env')) ? parse_ini_file('.env',true,INI_SCANNER_TYPED) : [];
+		$env = (file_exists('.env')) ? parse_ini_file('.env', true, INI_SCANNER_TYPED) : [];
 
 		$console->border()->info('.env');
 
-		$this->_env_loop($console,$padding,$env);
+		$this->_env_loop($console, $padding, $env);
 
-		$env_local = (file_exists('.env.local')) ? parse_ini_file('.env.local',true,INI_SCANNER_TYPED) : [];
+		$env_local = (file_exists('.env.local')) ? parse_ini_file('.env.local', true, INI_SCANNER_TYPED) : [];
 
 		$console->info('.env.local');
 
-		$this->_env_loop($console,$padding,$env_local);
+		$this->_env_loop($console, $padding, $env_local);
 
 		$console->info('Merged');
 
-		$merged = array_merge($_ENV,$env,$env_local);
+		$merged = array_merge($_ENV, $env, $env_local);
 			
-		$this->_env_loop($console,$padding,$merged);
-
+		$this->_env_loop($console, $padding, $merged);
 	}
 	
-	protected function _env_loop(&$console,&$padding,$env)
+	protected function _env_loop(&$console, &$padding, $env)
 	{
 		foreach ($env as $label=>$result) {
 			if (is_array($result)) {
 				$padding->label($label)->result($result);
 				
 				foreach ($result as $l=>$r) {
-				$padding->label('  '.$l)->result($r);
+					$padding->label('  '.$l)->result($r);
 				}
 			} else {
 				$padding->label($label)->result($result);
@@ -122,5 +119,4 @@ class HelpController extends MY_Controller {
 	
 		$console->border();
 	}
-	
 } /* end class */

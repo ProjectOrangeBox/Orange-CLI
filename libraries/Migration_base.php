@@ -1,13 +1,15 @@
 <?php
 
-class Migration_base {
+class Migration_base
+{
 	protected $dbforge;
 	protected $_error_string = '';
 	protected $console;
 	protected $hash = null;
 	protected $migration;
 
-	public function __construct() {
+	public function __construct()
+	{
 		/* we will probbly need this */
 		ci()->load->helper('file');
 
@@ -20,45 +22,51 @@ class Migration_base {
 	 *
 	 * @return	string	Error message returned as a string
 	 */
-	public function error_string() {
+	public function error_string()
+	{
 		return $this->_error_string;
 	}
 
 	/* wrapper */
-	public function up() {
+	public function up()
+	{
 		return true;
 	}
 
 	/* wrapper */
-	public function down() {
+	public function down()
+	{
 		return true;
 	}
 
-	protected function get_hash() {
-		$children = debug_backtrace(null,1);
+	protected function get_hash()
+	{
+		$children = debug_backtrace(null, 1);
 
 		$file = $children[0]['file'];
 
-		$this->hash = substr(str_replace([ROOTPATH.'/','/support/migrations'],'',$file),0,-4);
+		$this->hash = substr(str_replace([ROOTPATH.'/','/support/migrations'], '', $file), 0, -4);
 
 		return $this->hash;
 	}
 	
-	protected function hash() {
-		$children = debug_backtrace(null,1);
+	protected function hash()
+	{
+		$children = debug_backtrace(null, 1);
 
 		$this->hash = md5($children[0]['file']);
 
 		return $this->hash;
 	}
 	
-	protected function migration($direction,$as_string=true) {
-		$children = debug_backtrace(null,1);
+	protected function migration($direction, $as_string=true)
+	{
+		$children = debug_backtrace(null, 1);
 		
 		$this->hash = md5($children[0]['file']);
 		
 		$data = [
-			'migration'=>substr(str_replace(ROOTPATH,'',$children[0]['file']),0,-4),
+			'migration'=>substr(str_replace(ROOTPATH, '', $children[0]['file']), 0, -4),
 			'direction'=>$direction,
 			'hash'=>md5($children[0]['file']),
 		];
@@ -66,20 +74,23 @@ class Migration_base {
 		return ($as_string) ? 'Migrations: '.$data['migration'].PHP_EOL.' Direction: '.$data['direction'].PHP_EOL.'      Hash: '.$data['hash'].PHP_EOL.PHP_EOL : $data;
 	}
 
-	protected function e($output) {
+	protected function e($output)
+	{
 		if (is_cli()) {
 			echo $output.chr(10);
 		}
 	}
 
-	protected function _get_package() {
-		$children = debug_backtrace(null,1);
+	protected function _get_package()
+	{
+		$children = debug_backtrace(null, 1);
 
-		return str_replace(ROOTPATH,'',dirname(dirname(dirname($children[1]['file']))));
+		return str_replace(ROOTPATH, '', dirname(dirname(dirname($children[1]['file']))));
 	}
 
-	protected function _copy_config($filename) {
-		$filename = trim($filename,'/');
+	protected function _copy_config($filename)
+	{
+		$filename = trim($filename, '/');
 
 		$package_folder = $this->_get_package();
 		$package_config = $package_folder.'/'.$filename;
@@ -89,7 +100,7 @@ class Migration_base {
 
 		if (file_exists(ROOTPATH.$package_config)) {
 			if (is_writable(APPPATH.'config')) {
-				$success = copy(ROOTPATH.$package_config,APPPATH.$config_file);
+				$success = copy(ROOTPATH.$package_config, APPPATH.$config_file);
 			} else {
 				show_error('Can not write to "'.APPPATH.'config"');
 			}
@@ -100,8 +111,9 @@ class Migration_base {
 		return $success;
 	}
 
-	protected function _unlink_config($filename) {
-		$name = basename($filename,'.php');
+	protected function _unlink_config($filename)
+	{
+		$name = basename($filename, '.php');
 		$config_file = 'config/'.$name.'.php';
 
 		$success     = true;
@@ -113,9 +125,10 @@ class Migration_base {
 		return $success;
 	}
 
-	protected function _link_public($path) {
-		$package_folder = ROOTPATH.$this->_get_package().'/public/'.ltrim($path,'/');
-		$public_folder = WWW.'/'.ltrim($path,'/');
+	protected function _link_public($path)
+	{
+		$package_folder = ROOTPATH.$this->_get_package().'/public/'.ltrim($path, '/');
+		$public_folder = WWW.'/'.ltrim($path, '/');
 
 		/* let's make the public path if it's not there */
 		$drop_folder = dirname($public_folder);
@@ -134,27 +147,31 @@ class Migration_base {
 		return true;
 	}
 
-	protected function _unlink_public($path) {
-		$public_folder = WWW.'/'.ltrim($path,'/');
+	protected function _unlink_public($path)
+	{
+		$public_folder = WWW.'/'.ltrim($path, '/');
 
 		return unlink($public_folder);
 	}
 
 	/* these are only added to the var folder */
-	protected function _add_rw_folder($path) {
-		$var_folder = dirname(site_url('{rootpath}{uploads}',false));
+	protected function _add_rw_folder($path)
+	{
+		$var_folder = dirname(site_url('{rootpath}{uploads}', false));
 
-		return (is_writable($var_folder)) ? @mkdir($var_folder.'/'.rtrim($path,'/'),0777,true) : false;
+		return (is_writable($var_folder)) ? @mkdir($var_folder.'/'.rtrim($path, '/'), 0777, true) : false;
 	}
 
 	/* these are only removed from the var folder */
-	protected function _remove_rw_folder($path) {
-		$var_folder = dirname(path('{rootpath}{uploads}',false));
+	protected function _remove_rw_folder($path)
+	{
+		$var_folder = dirname(path('{rootpath}{uploads}', false));
 
-		return $this->_rmdirr($var_folder.'/'.rtrim($path,'/'));
+		return $this->_rmdirr($var_folder.'/'.rtrim($path, '/'));
 	}
 
-	protected function _rmdirr($directory) {
+	protected function _rmdirr($directory)
+	{
 		/* checks */
 		if (!is_string($directory) || empty($directory)) {
 			return $false;
@@ -181,7 +198,8 @@ class Migration_base {
 		return rmdir($directory);
 	}
 
-	protected function _add_route($text,$before_text) {
+	protected function _add_route($text, $before_text)
+	{
 		$text = rtrim($text);
 		$route_file = APPPATH.'config/routes.php';
 
@@ -191,10 +209,10 @@ class Migration_base {
 
 		$matched = false;
 		$new_contents = '';
-		$lines = explode(PHP_EOL,file_get_contents($route_file));
+		$lines = explode(PHP_EOL, file_get_contents($route_file));
 
 		foreach ($lines as $line) {
-			if (strpos($line,$before_text) !== false && !$matched) {
+			if (strpos($line, $before_text) !== false && !$matched) {
 				$new_contents .= $text.PHP_EOL;
 				$matched = true;
 			}
@@ -206,10 +224,11 @@ class Migration_base {
 			show_error('Route before text "'.$before_text.'" not found in "'.$route_file.'"');
 		}
 
-		return file_put_contents($route_file,trim($new_contents).PHP_EOL);
+		return file_put_contents($route_file, trim($new_contents).PHP_EOL);
 	}
 
-	protected function _remove_route($text,$quiet=false) {
+	protected function _remove_route($text, $quiet=false)
+	{
 		$text = rtrim($text);
 		$route_file = APPPATH.'config/routes.php';
 
@@ -220,17 +239,18 @@ class Migration_base {
 		$content = file_get_contents($route_file);
 
 		if (!$quiet) {
-			if (strpos($content,$text) === false) {
+			if (strpos($content, $text) === false) {
 				show_error('Route text not found in "'.$route_file.'"');
 			}
 		}
 
-		$content = str_replace($text.PHP_EOL,'',$content);
+		$content = str_replace($text.PHP_EOL, '', $content);
 
-		return file_put_contents($route_file,trim($content).PHP_EOL);
+		return file_put_contents($route_file, trim($content).PHP_EOL);
 	}
 
-	protected function _describe_table($tablename, $database_config = 'default') {
+	protected function _describe_table($tablename, $database_config = 'default')
+	{
 		$db = ci()->load->database($database_config, true);
 
 		$fields = false;
@@ -242,13 +262,15 @@ class Migration_base {
 		return $fields;
 	}
 
-	protected function _db_has_column($column, $tablename, $database_config = 'default') {
+	protected function _db_has_column($column, $tablename, $database_config = 'default')
+	{
 		$columns = $this->_describe_table($tablename, $database_config);
 
-		return (is_array($columns)) ? in_array($column,$columns) : false;
+		return (is_array($columns)) ? in_array($column, $columns) : false;
 	}
 
-	protected function _find_n_replace($file_path, $find, $replace, $return=false) {
+	protected function _find_n_replace($file_path, $find, $replace, $return=false)
+	{
 		$success = false;
 
 		if (file_exists($file_path)) {
@@ -263,20 +285,22 @@ class Migration_base {
 	}
 
 	/* target = file target / link = name */
-	protected function _relative_symlink($target,$link) {
+	protected function _relative_symlink($target, $link)
+	{
 		/* remove the link that might be there */
 
-		$link = str_replace(ROOTPATH,'',$link);
-		$target = str_replace(ROOTPATH,'',$target);
+		$link = str_replace(ROOTPATH, '', $link);
+		$target = str_replace(ROOTPATH, '', $target);
 
 		/* remove it if it's already there */
 		@unlink(ROOTPATH.$link);
 
 		/* create it */
-		return symlink(ROOTPATH.$target,ROOTPATH.$link);
+		return symlink(ROOTPATH.$target, ROOTPATH.$link);
 	}
 
-	protected function _getRelativePath($from_path, $to_path) {
+	protected function _getRelativePath($from_path, $to_path)
+	{
 		/* some compatibility fixes for Windows paths */
 		$from_path = is_dir($from_path) ? rtrim($from_path, '\/') . '/' : $from_path;
 		$to_path   = is_dir($to_path) ? rtrim($to_path, '\/') . '/' : $to_path;
@@ -311,5 +335,4 @@ class Migration_base {
 
 		return implode('/', $relPath);
 	}
-
 } /*end class */

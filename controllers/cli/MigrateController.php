@@ -1,23 +1,24 @@
 <?php
 /**
- * 
+ *
  * Migrates up to the current version
  * php public/index.php cli/migrate/up /packages/example/vendor
  * php public/index.php cli/migrate/latest /packages/example/vendor
- * 
+ *
  * Roll back changes or step forwards programmatically to specific versions
  * php public/index.php cli/migrate/version /packages/example/vendor 2
  * php public/index.php cli/migrate/down /packages/example/vendor 2
- * 
+ *
  * Find all migrations and show status
  * php public/index.php cli/migrate/find
- * 
+ *
  * Create a new migration
  * php public/index.php cli/migrate/create /packages/example/vendor "description with spaces"
- * 
+ *
  *
  */
-class MigrateController extends MY_Controller {
+class MigrateController extends MY_Controller
+{
 	protected $version_arg = 1;
 	protected $description_arg = 1;
 	protected $folder_arg = 1;
@@ -36,13 +37,13 @@ class MigrateController extends MY_Controller {
 		$this->console = new League\CLImate\CLImate;
 
 		$this->package_folder_path = $this->get_package();
-		$this->migration_folder_path = '/'.trim(str_replace(ROOTPATH,'',config('migration.migration_path','/support/migrations/')),'/');
+		$this->migration_folder_path = '/'.trim(str_replace(ROOTPATH, '', config('migration.migration_path', '/support/migrations/')), '/');
 
-		$autoload = load_config('autoload','autoload');
+		$autoload = load_config('autoload', 'autoload');
 
 		$this->packages = $autoload['packages'];
 
-		ci('package_migration_cli_wrapper')->set_path($this->package_folder_path,$this->migration_folder_path);
+		ci('package_migration_cli_wrapper')->set_path($this->package_folder_path, $this->migration_folder_path);
 	}
 
 	/**
@@ -113,7 +114,7 @@ class MigrateController extends MY_Controller {
 	 */
 	public function downCliAction()
 	{
-		ci('package_migration_cli_wrapper')->version((int)$this->get_section($this->version_arg,'version'));
+		ci('package_migration_cli_wrapper')->version((int)$this->get_section($this->version_arg, 'version'));
 	}
 
 	/* built in functions */
@@ -140,9 +141,9 @@ class MigrateController extends MY_Controller {
 	 */
 	public function currentCliAction()
 	{
-		$key = 'migration.migration_version@'.trim($this->package_folder_path,'/');
+		$key = 'migration.migration_version@'.trim($this->package_folder_path, '/');
 
-		$version = config($key,false);
+		$version = config($key, false);
 
 		if (!$version) {
 			$this->console->error('Not current configuration found for "'.$key.'".');
@@ -162,7 +163,7 @@ class MigrateController extends MY_Controller {
 	 */
 	public function versionCliAction()
 	{
-		ci('package_migration_cli_wrapper')->version((int)$this->get_section($this->version_arg,'version'));
+		ci('package_migration_cli_wrapper')->version((int)$this->get_section($this->version_arg, 'version'));
 	}
 
 	/**
@@ -177,10 +178,10 @@ class MigrateController extends MY_Controller {
 
 		/* look in each package */
 		foreach ($this->packages as $package) {
-			ci('package_migration_cli_wrapper')->set_path($package,$this->migration_folder_path)->find();
+			ci('package_migration_cli_wrapper')->set_path($package, $this->migration_folder_path)->find();
 		}
 
-		$this->console->border('-',(int)exec('tput cols'));
+		$this->console->border('-', (int)exec('tput cols'));
 	}
 
 	/**
@@ -188,7 +189,7 @@ class MigrateController extends MY_Controller {
 	 */
 	public function createCliAction()
 	{
-		ci('package_migration_cli_wrapper')->create($this->get_section($this->description_arg,'description'));
+		ci('package_migration_cli_wrapper')->create($this->get_section($this->description_arg, 'description'));
 	}
 
 	/* protected */
@@ -197,19 +198,19 @@ class MigrateController extends MY_Controller {
 		$path = '';
 
 		/* did they include anything? */
-		$raw_folder = $this->get_section($this->folder_arg,'package folder',false);
+		$raw_folder = $this->get_section($this->folder_arg, 'package folder', false);
 
 		/* is arg1 a folder */
-		if (strpos($raw_folder,'/') !== false) {
+		if (strpos($raw_folder, '/') !== false) {
 			/* yes it's a package folder - let's verify it */
 			$this->version_arg++;
 			$this->description_arg++;
 
 			/* verify it's a valid package */
-			$path = '/'.trim($raw_folder,'/');
+			$path = '/'.trim($raw_folder, '/');
 
-			if (substr($path,-strlen($this->migration_folder_path)) == $this->migration_folder_path) {
-				$path = substr($path,0,-strlen($this->migration_folder_path));
+			if (substr($path, -strlen($this->migration_folder_path)) == $this->migration_folder_path) {
+				$path = substr($path, 0, -strlen($this->migration_folder_path));
 			}
 
 			if (!file_exists(ROOTPATH.$folder)) {
@@ -218,7 +219,7 @@ class MigrateController extends MY_Controller {
 			}
 
 			if (!file_exists(ROOTPATH.$folder.$this->migration_folder_path)) {
-				mkdir(ROOTPATH.$folder.$this->migration_folder_path,0777,true);
+				mkdir(ROOTPATH.$folder.$this->migration_folder_path, 0777, true);
 
 				if (!file_exists(ROOTPATH.$folder.$this->migration_folder_path)) {
 					$this->console->error('"'.$folder.$this->migration_folder_path.'" does not seem to be a valid package migration path.');
@@ -230,7 +231,7 @@ class MigrateController extends MY_Controller {
 		return $path;
 	}
 
-	protected function get_section($num,$text,$required=true)
+	protected function get_section($num, $text, $required=true)
 	{
 		/* the first useable arg is 2 */
 		$num = $num + 1;
@@ -244,5 +245,4 @@ class MigrateController extends MY_Controller {
 
 		return $this->args[$num];
 	}
-
 } /* end class */

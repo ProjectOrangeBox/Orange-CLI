@@ -48,14 +48,15 @@
  * @author		Reactor Engineers
  * @link
  */
-class Package_migration {
+class Package_migration
+{
 
 	/**
 	 * Path to migration classes
 	 *
 	 * @var string
 	 */
-	protected $_migration_path = NULL;
+	protected $_migration_path = null;
 
 	/**
 	 * Current migration version
@@ -76,7 +77,7 @@ class Package_migration {
 	 *
 	 * @var	bool
 	 */
-	protected $_migration_auto_latest = FALSE;
+	protected $_migration_auto_latest = false;
 
 	/**
 	 * Migration basename regex
@@ -103,7 +104,7 @@ class Package_migration {
 		log_message('info', 'Migrations Class Initialized');
 
 		// Are they trying to use migrations while it is disabled?
-		if (config('migration.migration_enabled') !== TRUE) 	{
+		if (config('migration.migration_enabled') !== true) {
 			show_error('Migrations has been loaded but is disabled or set up incorrectly.');
 		}
 
@@ -130,15 +131,14 @@ class Package_migration {
 				'version' => ['type' => 'BIGINT', 'constraint' => 20],
 			]);
 
-			$this->dbforge->add_key('package', TRUE);
+			$this->dbforge->add_key('package', true);
 
-			$this->dbforge->create_table($this->_migration_table, TRUE);
+			$this->dbforge->create_table($this->_migration_table, true);
 		}
 
 		if (count($this->db->list_fields($this->_migration_table)) == 1) {
 			show_error('Your migration table "'.$this->_migration_table.'" is not package compatible. Please delete "'.$this->_migration_table.'" and let the Package_migration class create it. Then only use the package migration class since it can handle multiple packages.');
 		}
-
 	}
 
 	/**
@@ -162,7 +162,7 @@ class Package_migration {
 		if ($target_version > 0 && ! isset($migrations[$target_version])) {
 			$this->_error_string = sprintf($this->lang->line('migration_not_found'), $target_version);
 
-			return FALSE;
+			return false;
 		}
 
 		if ($target_version > $current_version) {
@@ -173,7 +173,7 @@ class Package_migration {
 			krsort($migrations);
 		} else {
 			// Well, there's nothing to migrate then ...
-			return TRUE;
+			return true;
 		}
 
 		// Validate all available migrations within our target range.
@@ -184,7 +184,7 @@ class Package_migration {
 		// See https://github.com/bcit-ci/CodeIgniter/issues/4539
 		$pending = [];
 
-		foreach ($migrations as $number => $file) 	{
+		foreach ($migrations as $number => $file) {
 			// Ignore versions out of our range.
 			//
 			// Because we've previously sorted the $migrations array depending on the direction,
@@ -204,10 +204,10 @@ class Package_migration {
 			}
 
 			// Check for sequence gaps
-			if (isset($previous) && abs($number - $previous) > 1) 	{
+			if (isset($previous) && abs($number - $previous) > 1) {
 				$this->_error_string = sprintf($this->lang->line('migration_sequence_gap'), $number);
 
-				return FALSE;
+				return false;
 			}
 
 			$previous = $number;
@@ -215,24 +215,24 @@ class Package_migration {
 			include_once $file;
 
 			/* full filename used so we don't run into other migration classes that have the same name but a different version */
-			$class = 'Migration_'.ucfirst(strtolower(basename($file,'.php')));
+			$class = 'Migration_'.ucfirst(strtolower(basename($file, '.php')));
 
 			// Validate the migration file structure
-			if (!class_exists($class, FALSE)) 	{
+			if (!class_exists($class, false)) {
 				$this->_error_string = sprintf($this->lang->line('migration_class_doesnt_exist'), $class);
 
-				return FALSE;
-			} elseif ( ! is_callable([$class, $method])) 	{
+				return false;
+			} elseif (! is_callable([$class, $method])) {
 				$this->_error_string = sprintf($this->lang->line('migration_missing_'.$method.'_method'), $class);
 
-				return FALSE;
+				return false;
 			}
 
 			$pending[$number] = [$class, $method];
 		}
 
 		// Now just run the necessary migrations
-		foreach ($pending as $number => $migration) 	{
+		foreach ($pending as $number => $migration) {
 			log_message('debug', 'Migrating '.$method.' from version '.$current_version.' to version '.$number);
 
 			$migration[0] = new $migration[0]();
@@ -246,7 +246,7 @@ class Package_migration {
 
 				log_message('debug', $this->_error_string);
 
-				return FALSE;
+				return false;
 			}
 
 			$current_version = $number;
@@ -279,7 +279,7 @@ class Package_migration {
 		if (empty($migrations)) {
 			$this->_error_string = $this->lang->line('migration_none_found');
 
-			return FALSE;
+			return false;
 		}
 
 		$last_migration = basename(end($migrations));
@@ -316,7 +316,7 @@ class Package_migration {
 	 *
 	 * @return	array	list of migration file paths sorted by version
 	 */
-	public function find_migrations() 
+	public function find_migrations()
 	{
 		$migrations = [];
 
@@ -325,7 +325,7 @@ class Package_migration {
 			$name = basename($file, '.php');
 
 			// Filter out non-migration files
-			if (preg_match($this->_migration_regex, $name)) 	{
+			if (preg_match($this->_migration_regex, $name)) {
 				$number = $this->_get_migration_number($name);
 
 				// There cannot be duplicate migration numbers
@@ -369,20 +369,20 @@ class Package_migration {
 
 	public function set_path($path = null)
 	{
-		$this->_migration_path = ($path) ? rtrim($path,'/').'/' : rtrim(config('migration.migration_path'),'/');
+		$this->_migration_path = ($path) ? rtrim($path, '/').'/' : rtrim(config('migration.migration_path'), '/');
 
 		return $this;
 	}
 
-	public function create($description,$up='',$down='')
+	public function create($description, $up='', $down='')
 	{
-		$name = ($description) ? filter('filename',$description) : 'migration';
+		$name = ($description) ? filter('filename', $description) : 'migration';
 		$stamp = (config('migration.migration_type') == 'timestamp') ? date('YmdHis') : $this->get_next_sequential($this->_migration_path);
 
-		$file = ROOTPATH.rtrim($this->_migration_path,'/').'/'.$stamp.'_'.$name.'.php';
+		$file = ROOTPATH.rtrim($this->_migration_path, '/').'/'.$stamp.'_'.$name.'.php';
 
 		if (!file_exists(dirname($file))) {
-			if (!mkdir(dirname($file),0777,true)) {
+			if (!mkdir(dirname($file), 0777, true)) {
 				show_error('Can not write to '.dirname($file).chr(10));
 			}
 		}
@@ -393,12 +393,12 @@ class Package_migration {
 
 		$template = file_get_contents(__DIR__.'/Migration_template.tmpl');
 		
-		$php = ci('parser')->parse_string($template,['name'=>basename($file,'.php'),'up'=>$up,'down'=>$down],true);
+		$php = ci('parser')->parse_string($template, ['name'=>basename($file, '.php'),'up'=>$up,'down'=>$down], true);
 
-		$written = (file_put_contents($file,$php)) ? $file : false;
+		$written = (file_put_contents($file, $php)) ? $file : false;
 
 		if ($written) {
-			chmod($file,0777);
+			chmod($file, 0777);
 		}
 
 		return $written;
@@ -412,21 +412,21 @@ class Package_migration {
 	 */
 	protected function _update_version($migration)
 	{
-		$this->db->replace($this->_migration_table,['package'=>$this->prep_package($this->_migration_path),'version'=>$migration]);
+		$this->db->replace($this->_migration_table, ['package'=>$this->prep_package($this->_migration_path),'version'=>$migration]);
 	}
 
 	protected function prep_package($path)
 	{
-		$prep = str_replace([ROOTPATH,'/support/migrations/'],'',$path);
+		$prep = str_replace([ROOTPATH,'/support/migrations/'], '', $path);
 
 		return (empty($prep) ? '/application' : $prep);
 	}
 
 	protected function get_next_sequential($folder)
 	{
-		list($highest) = explode('_',basename(end(glob(ROOTPATH.$folder.'*_*.php'))),1);
+		list($highest) = explode('_', basename(end(glob(ROOTPATH.$folder.'*_*.php'))), 1);
 
-		return substr('000'.((int)$highest+1),-3);
+		return substr('000'.((int)$highest+1), -3);
 	}
 
 	/**
@@ -439,5 +439,4 @@ class Package_migration {
 	{
 		return get_instance()->$var;
 	}
-
 }

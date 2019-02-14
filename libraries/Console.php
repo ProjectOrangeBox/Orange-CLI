@@ -16,7 +16,8 @@
  * and different option handling.
  */
 
-class Console {
+class Console
+{
 	public $debug = false;
 	public $segments = [];
 	public $options = [];
@@ -26,7 +27,8 @@ class Console {
 	protected $foreground_colors = array();
 	protected $background_colors = array();
 
-	public function __construct() {
+	public function __construct()
+	{
 		// Set up shell colors
 		$this->foreground_colors['off'] = '0;0';
 
@@ -58,7 +60,8 @@ class Console {
 	 * but argc has always had our back. We don't have all of the "power"
 	 * of getopt but this does us just fine.
 	 */
-	protected function parseCommand() {
+	protected function parseCommand()
+	{
 		$options_found = false;
 
 		for ($i = 1; $i < $_SERVER['argc']; $i++) {
@@ -79,7 +82,7 @@ class Console {
 			$value = null;
 
 			// If the next item starts with a dash it's a value
-			if (isset($_SERVER['argv'][$i + 1]) && substr($_SERVER['argv'][$i + 1], 0, 1) != '-' ) {
+			if (isset($_SERVER['argv'][$i + 1]) && substr($_SERVER['argv'][$i + 1], 0, 1) != '-') {
 				$value = $_SERVER['argv'][$i + 1];
 				$i++;
 			}
@@ -88,9 +91,10 @@ class Console {
 		}
 	}
 
-	public function option_plus_one($match) {
+	public function option_plus_one($match)
+	{
 		foreach ($_SERVER['argv'] as $idx=>$a) {
-			if (substr($a,0,1) == '-' && substr($a,-1) == $match) {
+			if (substr($a, 0, 1) == '-' && substr($a, -1) == $match) {
 				return $_SERVER['argv'][$idx+1];
 			}
 		}
@@ -98,26 +102,29 @@ class Console {
 		return null;
 	}
 
-	public function segment($num) {
+	public function segment($num)
+	{
 		return $this->segments[$num];
 	}
 
-	public function option($x,$default=null) {
-		return (array_key_exists($x,$this->options)) ? $this->options[$x] : $default;
+	public function option($x, $default=null)
+	{
+		return (array_key_exists($x, $this->options)) ? $this->options[$x] : $default;
 	}
 
 	// Returns colored string
-	public function out($input,$die=false,$stream='STDOUT') {
+	public function out($input, $die=false, $stream='STDOUT')
+	{
 		if (is_array($input)) {
-			$input = implode(PHP_EOL,$input);
+			$input = implode(PHP_EOL, $input);
 		}
 
 		foreach ($this->foreground_colors as $color=>$console) {
-			$input = str_replace('<'.$color.'>',"\033[".$console."m",$input);
-			$input = str_replace('</'.$color.'>',"\033[0m",$input);
+			$input = str_replace('<'.$color.'>', "\033[".$console."m", $input);
+			$input = str_replace('</'.$color.'>', "\033[0m", $input);
 		}
 
-		$input = str_replace('\n',chr(10),$input)."\033[0m";
+		$input = str_replace('\n', chr(10), $input)."\033[0m";
 
 		/* which stream? */
 		if ($stream == 'STDOUT') {
@@ -133,49 +140,59 @@ class Console {
 		return $this;
 	}
 
-	public function e($input) {
+	public function e($input)
+	{
 		$this->out($input.PHP_EOL);
 
 		return $this;
 	}
 
-	public function output($input) {
+	public function output($input)
+	{
 		$this->out($input.PHP_EOL);
 
 		return $this;
 	}
 
-	public function debug($bol) {
+	public function debug($bol)
+	{
 		$this->debug = $bol;
 
 		return $this;
 	}
 
-	public function error($input,$die=true) {
-		return $this->out('<light_red>'.$input.'</off>'.PHP_EOL,$die,'STDERR');
+	public function error($input, $die=true)
+	{
+		return $this->out('<light_red>'.$input.'</off>'.PHP_EOL, $die, 'STDERR');
 	}
 	
-	public function heading($txt) {
-		$this->e('<cyan>'.str_pad('- '.$txt.' ',exec('tput cols'),'-',STR_PAD_RIGHT).'</off>');
+	public function heading($txt)
+	{
+		$this->e('<cyan>'.str_pad('- '.$txt.' ', exec('tput cols'), '-', STR_PAD_RIGHT).'</off>');
 	}
 
-	public function sub_heading($txt) {
+	public function sub_heading($txt)
+	{
 		$this->e('<blue> ## '.$txt.' ##</off>');
 	}
 
-	public function success($txt) {
+	public function success($txt)
+	{
 		$this->e('<green>✓ '.$txt.'</off>');
 	}
 
-	public function info($txt) {
+	public function info($txt)
+	{
 		$this->e('<cyan>? '.$txt.'</off>');
 	}
 
-	public function warning($txt) {
+	public function warning($txt)
+	{
 		$this->e('<yellow>⚠ '.$txt.'</off>');
 	}
 
-	public function danger($txt) {
+	public function danger($txt)
+	{
 		$this->e('<red>X '.$txt.'</off>');
 	}
 
@@ -188,7 +205,8 @@ class Console {
 	 * @param	string|int	$name	the name of the option (int if unnamed)
 	 * @return	string
 	 */
-	public function in($prefix = '') {
+	public function in($prefix = '')
+	{
 		if ($this->readline_support) {
 			return readline($prefix);
 		}
@@ -198,11 +216,13 @@ class Console {
 		return fgets(STDIN);
 	}
 
-	public function input($prefix = '') {
+	public function input($prefix = '')
+	{
 		return $this->in($prefix);
 	}
 
-	public function d() {
+	public function d()
+	{
 		if ($this->debug) {
 			foreach (func_get_args() as $a) {
 				var_dump($a);
@@ -231,7 +251,8 @@ class Console {
 	 *
 	 * @return	string	the user input
 	 */
-	public function prompt() {
+	public function prompt()
+	{
 		$args = func_get_args();
 
 		$options = array();
@@ -299,7 +320,7 @@ class Console {
 		}
 
 		// If options are provided and the choice is not in the array, tell them to try again
-		if ( ! empty($options) && ! in_array($input, $options)) {
+		if (! empty($options) && ! in_array($input, $options)) {
 			$this->write('This is not a valid option. Please try again.');
 			$this->new_line();
 
@@ -314,7 +335,8 @@ class Console {
 	 *
 	 * @param	int $num	the number of times to beep
 	 */
-	public function beep($num = 1) {
+	public function beep($num = 1)
+	{
 		echo str_repeat("\x07", $num);
 
 		return $this;
@@ -327,7 +349,8 @@ class Console {
 	 * @param	int		$seconds	number of seconds
 	 * @param	bool	$countdown	show a countdown or not
 	 */
-	public function wait($seconds = 0, $countdown = false) {
+	public function wait($seconds = 0, $countdown = false)
+	{
 		if ($countdown === true) {
 			$time = $seconds;
 
@@ -356,7 +379,8 @@ class Console {
 	 * @param	integer	Number of lines to output
 	 * @return	void
 	 */
-	public function new_line($num = 1) {
+	public function new_line($num = 1)
+	{
 		// Do it once or more, write with empty string gives us a new line
 		for ($i = 0; $i < $num; $i++) {
 			$this->e('');
@@ -370,19 +394,22 @@ class Console {
 	 *
 	 * @return	void
 	 */
-	public function clear_screen() {
+	public function clear_screen()
+	{
 		fwrite(STDOUT, chr(27)."[H".chr(27)."[2J");
 
 		return $this;
 	}
 
-	public function getWidth() {
+	public function getWidth()
+	{
 		return (int)shell_exec('tput cols');
 	}
 
 	//--------------------------------------------------------------------
 
-	public function getHeight() {
+	public function getHeight()
+	{
 		return (int)shell_exec('tput lines');
 	}
 
@@ -393,7 +420,8 @@ class Console {
    * @param int $thisStep
    * @param int $totalSteps
    */
-	public function showProgress($thisStep=1, $totalSteps=10) {
+	public function showProgress($thisStep=1, $totalSteps=10)
+	{
 		// The first time through, save
 		// our position so the script knows where to go
 		// back to when writing the bar, and
@@ -411,7 +439,7 @@ class Console {
 			$thisStep = abs($thisStep);
 			$totalSteps = $totalSteps < 1 ? 1 : $totalSteps;
 
-			$percent = intval( ($thisStep / $totalSteps) * 100 );
+			$percent = intval(($thisStep / $totalSteps) * 100);
 			$step = (int)round($percent / 10);
 
 			// Write the progress bar
@@ -425,10 +453,10 @@ class Console {
 		}
 	}
 
-	public function line($length=null,$char='-') {
+	public function line($length=null, $char='-')
+	{
 		$length = ($length) ? (int)$length : $this->getWidth();
 
-		return $this->e(str_pad('',$length,$char));
+		return $this->e(str_pad('', $length, $char));
 	}
-
 } /* end output class */
